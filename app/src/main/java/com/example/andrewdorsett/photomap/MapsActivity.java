@@ -9,12 +9,19 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
 
     private GoogleMap mMap;
-    private LatLng passedMarker;
+    private List<ImageMarker> passedMarker = new ArrayList<>();
+    private Map<Marker, ImageMarker> markerMap = new HashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,8 +33,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mapFragment.getMapAsync(this);
 
         Intent intent = getIntent();
-        if (intent.hasExtra("latLng")) {
-            passedMarker = intent.getParcelableExtra("latLng");
+        if (intent.hasExtra("markers")) {
+            passedMarker = intent.getParcelableArrayListExtra("markers");
         }
     }
 
@@ -45,9 +52,30 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        // Add a marker in Sydney and move the camera
-        LatLng sydney = passedMarker == null ? new LatLng(-34, 151) : passedMarker;
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        for (ImageMarker imageMarker : passedMarker) {
+            Marker mapMarker = mMap.addMarker(new MarkerOptions()
+                    .position(imageMarker.getLatLng())
+                    .title(imageMarker.getTitle()));
+            markerMap.put(mapMarker, imageMarker);
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(imageMarker.getLatLng()));
+        }
+
+        mMap.setOnMarkerClickListener(this);
+    }
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        if (markerMap.containsKey(marker)) {
+            Intent intent = new Intent(this, DisplayImageActivity.class);
+            intent.putExtra("uri", markerMap.get(marker).getImageUri());
+            startActivity(intent);
+        }
+
+        return false;
+    }
+
+    @Override
+    public void onPointerCaptureChanged(boolean hasCapture) {
+
     }
 }

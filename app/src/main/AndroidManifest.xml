@@ -37,7 +37,12 @@
 
         <activity
             android:name=".MapsActivity"
-            android:label="@string/title_activity_maps"></activity>
+            android:label="@string/title_activity_maps" />
+        <activity
+            android:name=".DisplayImageActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_display_image"
+            android:theme="@style/FullscreenTheme"></activity>
     </application>
 
 </manifest>
