@@ -66,7 +66,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public boolean onMarkerClick(Marker marker) {
         if (markerMap.containsKey(marker)) {
-            Intent intent = new Intent(this, DisplayImageActivity.class);
+            Intent intent = new Intent(this, ImageGalleryDisplayActivity.class);
             intent.putExtra("uri", markerMap.get(marker).getImageUri());
             startActivity(intent);
         }

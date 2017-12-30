@@ -39,10 +39,9 @@
             android:name=".MapsActivity"
             android:label="@string/title_activity_maps" />
         <activity
-            android:name=".DisplayImageActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/title_activity_display_image"
-            android:theme="@style/FullscreenTheme"></activity>
+            android:name=".ImageGalleryDisplayActivity"
+            android:label="@string/title_activity_image_gallery_display"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>
