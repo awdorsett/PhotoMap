@@ -10,6 +10,10 @@ import android.support.v7.widget.Toolbar;
 import android.text.Layout;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+
+import java.util.List;
 
 public class ImageGalleryDisplayActivity extends AppCompatActivity {
 
@@ -18,6 +22,8 @@ public class ImageGalleryDisplayActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_image_gallery_display);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        LinearLayout container = findViewById(R.id.displayImageContainer);
+
         setSupportActionBar(toolbar);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -35,22 +41,30 @@ public class ImageGalleryDisplayActivity extends AppCompatActivity {
         // TODO: set parameters as static references
         if (getIntent().hasExtra("group_title")) {
             // Nothing currently
+            layout.setTitle(getIntent().getStringExtra("group_title"));
         } else {
             layout.setTitle("Photos");
         }
 
-        if (getIntent().hasExtra("uri")) {
-            Uri uri = getIntent().getParcelableExtra("uri");
+        if (getIntent().hasExtra("uris")) {
+            List<Uri> uris = getIntent().getParcelableArrayListExtra("uris");
 
-            ImageView image = findViewById(R.id.displayImage);
-            // Test duplicate images
-            // TODO: Remove
-            ImageView image2 = findViewById(R.id.displayImage2);
-            ImageView image3 = findViewById(R.id.displayImage3);
+            for (Uri uri : uris) {
+                ImageView iv = new ImageView(getApplicationContext());
 
-            image.setImageURI(uri);
-            image2.setImageURI(uri);
-            image3.setImageURI(uri);
+                // Set an image for ImageView
+                iv.setImageURI(uri);
+
+                // Create layout parameters for ImageView
+                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+
+                // Add layout parameters to ImageView
+                iv.setLayoutParams(lp);
+
+                // Finally, add the ImageView to layout
+                container.addView(iv);
+            }
+
         }
     }
 }

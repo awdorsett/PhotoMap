@@ -1,6 +1,7 @@
 package com.example.andrewdorsett.photomap;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 
@@ -20,8 +21,8 @@ import java.util.Map;
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
 
     private GoogleMap mMap;
-    private List<ImageMarker> passedMarker = new ArrayList<>();
-    private Map<Marker, ImageMarker> markerMap = new HashMap<>();
+    private List<MarkerGroup> groups = new ArrayList<>();
+    private Map<Marker, MarkerGroup> markerMap = new HashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,8 +34,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mapFragment.getMapAsync(this);
 
         Intent intent = getIntent();
-        if (intent.hasExtra("markers")) {
-            passedMarker = intent.getParcelableArrayListExtra("markers");
+        if (intent.hasExtra("groups")) {
+            groups = intent.getParcelableArrayListExtra("groups");
         }
     }
 
@@ -52,12 +53,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        for (ImageMarker imageMarker : passedMarker) {
+        for (MarkerGroup group : groups) {
+            LatLng groupLoc = group.getLatLng();
             Marker mapMarker = mMap.addMarker(new MarkerOptions()
-                    .position(imageMarker.getLatLng())
-                    .title(imageMarker.getTitle()));
-            markerMap.put(mapMarker, imageMarker);
-            mMap.moveCamera(CameraUpdateFactory.newLatLng(imageMarker.getLatLng()));
+                    .position(groupLoc)
+                    .title(group.getKey()));
+            markerMap.put(mapMarker, group);
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(groupLoc));
         }
 
         mMap.setOnMarkerClickListener(this);
@@ -66,8 +68,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public boolean onMarkerClick(Marker marker) {
         if (markerMap.containsKey(marker)) {
+            ArrayList<Uri> imageUris = new ArrayList<>();
+            for (ImageMarker imageMarker : markerMap.get(marker).getMarkers()) {
+                imageUris.add(imageMarker.getImageUri());
+            }
             Intent intent = new Intent(this, ImageGalleryDisplayActivity.class);
-            intent.putExtra("uri", markerMap.get(marker).getImageUri());
+            // TODO update key to static
+            intent.putExtra("group_title", markerMap.get(marker).getKey());
+            intent.putParcelableArrayListExtra("uris", imageUris);
             startActivity(intent);
         }
 

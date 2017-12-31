@@ -4,6 +4,8 @@ import android.content.ClipData;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
+import android.location.Address;
+import android.location.Geocoder;
 import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -20,19 +22,26 @@ import com.google.android.gms.maps.model.LatLng;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.drew.metadata.exif.ExifDirectoryBase.TAG_DATETIME_ORIGINAL;
 
 public class MainActivity extends AppCompatActivity {
     private static int PICK_IMAGE = 101;
-    private ArrayList<ImageMarker> imageMarkers = new ArrayList<>();
+//    private ArrayList<ImageMarker> imageMarkers = new ArrayList<>();
+    private ArrayList<MarkerGroup> groups = new ArrayList<>();
+    private HashMap<String, MarkerGroup> groupMap = new HashMap<>();
     private Date latestDate = null;
+    private Geocoder geocoder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        geocoder = new Geocoder(this);
 
         Button imageButton = (Button) findViewById(R.id.imageButton);
         Button mapButton = (Button) findViewById(R.id.mapButton);
@@ -54,15 +63,15 @@ public class MainActivity extends AppCompatActivity {
     public void launchMaps(View view) {
         Intent intent = new Intent(this, MapsActivity.class);
 
-        if (imageMarkers.size() > 0) {
-            intent.putParcelableArrayListExtra("markers", imageMarkers);
+        // TODO update key with static enum
+        if (groups.size() > 0) {
+            intent.putParcelableArrayListExtra("groups", groups);
         }
 
         startActivity(intent);
     }
 
     public void launchGallery(View view) {
-        imageMarkers = new ArrayList<>();
         Intent intent = new Intent();
         intent.setType("image/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);
@@ -73,11 +82,15 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        ArrayList<ImageMarker> imageMarkers = new ArrayList<>();
+
         if (requestCode == PICK_IMAGE) {
+            groups = new ArrayList<>();
             if (data.getData() != null) {
                 ImageMarker marker = getMarker(data.getData());
                 if (marker != null) {
-                    imageMarkers.add(getMarker(data.getData()));
+                    imageMarkers.add(marker);
+                    addImageMarkerToGroup(marker);
                 }
             } else if (data.getClipData() != null) {
                 ClipData clipData = data.getClipData();
@@ -85,9 +98,12 @@ public class MainActivity extends AppCompatActivity {
                     ImageMarker marker = getMarker(clipData.getItemAt(i).getUri());
                     if (marker != null) {
                         imageMarkers.add(marker);
+                        addImageMarkerToGroup(marker);
                     }
                 }
             }
+
+
         }
     }
 
@@ -132,5 +148,28 @@ public class MainActivity extends AppCompatActivity {
             }
 
         return marker;
+    }
+
+    private void addImageMarkerToGroup(ImageMarker marker) {
+        // TODO catch appropriate exception
+        try {
+            List<Address> addresses = geocoder.getFromLocation(
+                    marker.getLatLng().latitude,
+                    marker.getLatLng().longitude,
+                    1);
+            if (addresses.size() > 0) {
+                Address address = addresses.get(0);
+                MarkerGroup group;
+                if (groupMap.containsKey(address.getLocality())) {
+                    group = groupMap.get(address.getLocality());
+                } else {
+                    group = new MarkerGroup(address.getLocality(), address.getLatitude(), address.getLongitude());
+                    groupMap.put(address.getLocality(), group);
+                }
+
+                group.setMarker(marker);
+                groups.add(group);
+            }
+        } catch (Exception e) {}
     }
 }
