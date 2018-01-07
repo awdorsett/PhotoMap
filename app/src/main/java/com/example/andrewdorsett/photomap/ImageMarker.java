@@ -14,6 +14,7 @@ import java.util.Date;
 
 public class ImageMarker implements Parcelable {
     public static final Integer DEFAULT_GROUP_ID = 1;
+    private long id = -1;
     private String title;
     private LatLng latLng;
     private Date originalDate;
@@ -32,16 +33,25 @@ public class ImageMarker implements Parcelable {
     };
 
     public ImageMarker() {
-        this(null, 0, 0, null, null, null, DEFAULT_GROUP_ID);
+        this(-1, null, 0, 0, null, null, null, DEFAULT_GROUP_ID);
     }
 
-    public ImageMarker(String title, double latitude, double longitude, Date originalDate, Date addedDate, Uri imageUri, int groupId) {
+    public ImageMarker(long id, String title, double latitude, double longitude, Date originalDate, Date addedDate, Uri imageUri, int groupId) {
+        this.id = id;
         this.title = title;
         latLng = new LatLng(latitude, longitude);
         this.originalDate = originalDate;
         this.addedDate = addedDate;
         this.imageUri = imageUri;
         this.groupId = groupId;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 
     public String getTitle() {
@@ -99,6 +109,7 @@ public class ImageMarker implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeLong(id);
         parcel.writeString(title);
         parcel.writeDouble(latLng.latitude);
         parcel.writeDouble(latLng.longitude);
@@ -109,6 +120,7 @@ public class ImageMarker implements Parcelable {
     }
 
     public ImageMarker(Parcel in) {
+        this.id = in.readLong();
         this.title = in.readString();
         latLng = new LatLng(in.readDouble(), in.readDouble());
         this.originalDate = new Date(in.readLong());

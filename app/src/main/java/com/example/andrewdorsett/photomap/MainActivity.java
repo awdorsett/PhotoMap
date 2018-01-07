@@ -35,12 +35,13 @@ public class MainActivity extends AppCompatActivity {
     private HashMap<String, MarkerGroup> groupMap = new HashMap<>();
     private Date latestDate = null;
     private Geocoder geocoder;
+    private MarkerSQLiteOpenHelper sqlHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        sqlHelper = new MarkerSQLiteOpenHelper(this);
         geocoder = new Geocoder(this);
 
         Button imageButton = (Button) findViewById(R.id.imageButton);
@@ -61,6 +62,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void launchMaps(View view) {
+        // TODO move the save to DB
+        sqlHelper.saveGroupToDB(groups);
         Intent intent = new Intent(this, MapsActivity.class);
 
         // TODO update key with static enum
@@ -83,9 +86,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         ArrayList<ImageMarker> imageMarkers = new ArrayList<>();
-
+        MarkerSQLiteOpenHelper db = new MarkerSQLiteOpenHelper(this);
+        getGroupsFromDB();
         if (requestCode == PICK_IMAGE) {
-            groups = new ArrayList<>();
             if (data.getData() != null) {
                 ImageMarker marker = getMarker(data.getData());
                 if (marker != null) {
@@ -171,5 +174,9 @@ public class MainActivity extends AppCompatActivity {
                 groups.add(group);
             }
         } catch (Exception e) {}
+    }
+
+    private void getGroupsFromDB() {
+        groups = sqlHelper.getGroups();
     }
 }

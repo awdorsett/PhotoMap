@@ -14,6 +14,7 @@ import java.util.List;
 
 public class MarkerGroup implements Parcelable {
     private List<ImageMarker> markers = new ArrayList<>();
+    private long id = -1;
     private String key;
     private LatLng latLng;
 
@@ -23,6 +24,7 @@ public class MarkerGroup implements Parcelable {
     }
 
     public MarkerGroup(Parcel in) {
+        id = in.readLong();
         in.readList(markers, ImageMarker.CREATOR.getClass().getClassLoader());
         key = in.readString();
         latLng = new LatLng(in.readDouble(), in.readDouble());
@@ -37,6 +39,15 @@ public class MarkerGroup implements Parcelable {
             return new MarkerGroup[size];
         }
     };
+
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
 
     public List<ImageMarker> getMarkers() {
         return markers;
@@ -73,6 +84,7 @@ public class MarkerGroup implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeLong(id);
         parcel.writeList(markers);
         parcel.writeString(key);
         parcel.writeDouble(latLng.latitude);
