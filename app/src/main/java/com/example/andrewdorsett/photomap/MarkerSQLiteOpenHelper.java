@@ -132,7 +132,6 @@ public class MarkerSQLiteOpenHelper extends SQLiteOpenHelper {
             values.put(ORIGINAL_DATE, marker.getOriginalDate().getTime());
             values.put(ADDED_DATE, marker.getAddedDate().getTime());
             values.put(ADDED_DATE, System.currentTimeMillis());
-//            values.put(GROUP_ID, group.getId());
             long id = database.replace(MARKER_TABLE, null, values);
             if (id != -1) {
                 marker.setId(id);

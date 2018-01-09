@@ -30,6 +30,7 @@ import static com.drew.metadata.exif.ExifDirectoryBase.TAG_DATETIME_ORIGINAL;
 
 public class MainActivity extends AppCompatActivity {
     private static int PICK_IMAGE = 101;
+    private static int OPEN_IMAGE_SELECT = 102;
 //    private ArrayList<ImageMarker> imageMarkers = new ArrayList<>();
     private ArrayList<MarkerGroup> groups = new ArrayList<>();
     private HashMap<String, MarkerGroup> groupMap = new HashMap<>();
@@ -46,7 +47,11 @@ public class MainActivity extends AppCompatActivity {
 
         Button imageButton = (Button) findViewById(R.id.imageButton);
         Button mapButton = (Button) findViewById(R.id.mapButton);
-//        groups = sqlHelper.getGroups();
+        groups = sqlHelper.getGroups();
+
+        if (groups.size() > 0) {
+            launchMaps(null);
+        }
 
         imageButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -64,7 +69,6 @@ public class MainActivity extends AppCompatActivity {
         // Drop tables for testing only
         // TODO Remove after testing is done
         // sqlHelper.resetTables();
-        groups = sqlHelper.getGroups();
         Button resetButton = findViewById(R.id.resetButton);
         resetButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -119,8 +123,8 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
             }
-
-
+        } else if (requestCode == OPEN_IMAGE_SELECT) {
+            launchGallery(null);
         }
     }
 
