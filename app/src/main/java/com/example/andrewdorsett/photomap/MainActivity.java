@@ -46,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
 
         Button imageButton = (Button) findViewById(R.id.imageButton);
         Button mapButton = (Button) findViewById(R.id.mapButton);
+//        groups = sqlHelper.getGroups();
 
         imageButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -57,6 +58,19 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 launchMaps(view);
+            }
+        });
+
+        // Drop tables for testing only
+        // TODO Remove after testing is done
+        // sqlHelper.resetTables();
+        groups = sqlHelper.getGroups();
+        Button resetButton = findViewById(R.id.resetButton);
+        resetButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                groups = new ArrayList<>();
+                sqlHelper.resetTables();
             }
         });
     }
@@ -87,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         ArrayList<ImageMarker> imageMarkers = new ArrayList<>();
         MarkerSQLiteOpenHelper db = new MarkerSQLiteOpenHelper(this);
-        getGroupsFromDB();
+//        getGroupsFromDB();
         if (requestCode == PICK_IMAGE) {
             if (data.getData() != null) {
                 ImageMarker marker = getMarker(data.getData());
@@ -163,20 +177,21 @@ public class MainActivity extends AppCompatActivity {
             if (addresses.size() > 0) {
                 Address address = addresses.get(0);
                 MarkerGroup group;
+
                 if (groupMap.containsKey(address.getLocality())) {
                     group = groupMap.get(address.getLocality());
                 } else {
                     group = new MarkerGroup(address.getLocality(), address.getLatitude(), address.getLongitude());
                     groupMap.put(address.getLocality(), group);
+                    groups.add(group);
                 }
 
                 group.setMarker(marker);
-                groups.add(group);
             }
         } catch (Exception e) {}
     }
 
     private void getGroupsFromDB() {
-        groups = sqlHelper.getGroups();
+        sqlHelper.getGroups();
     }
 }

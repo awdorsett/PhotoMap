@@ -7,11 +7,13 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQuery;
 import android.database.sqlite.SQLiteQueryBuilder;
+import android.net.Uri;
 
 import com.google.common.base.Joiner;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,6 +38,7 @@ public class MarkerSQLiteOpenHelper extends SQLiteOpenHelper {
     public static final String MARKER_IDS = "markerIds";
 
     public static final String [] GROUP_COLUMNS = {ID, TITLE, LONGITUDE, LATITUDE, MARKER_IDS, ADDED_DATE};
+    public static final String [] MARKER_COLUMNS = {ID, URI, TITLE, LONGITUDE, LATITUDE, ORIGINAL_DATE, ADDED_DATE, GROUP_ID};
 
 //    private static final String INSERT_MARKER_STATEMENT =
 //            String.format("REPLACE INTO " + MARKER_TABLE + " ("
@@ -77,6 +80,8 @@ public class MarkerSQLiteOpenHelper extends SQLiteOpenHelper {
                 LATITUDE + " DOUBLE, " +
                 MARKER_IDS + " TEXT, " +
                 ADDED_DATE + " LONG)");
+
+        sqLiteDatabase.execSQL("CREATE INDEX " + TITLE + " ON " + GROUP_TABLE + "("+ ID +")");
     }
 
     @Override
@@ -84,6 +89,33 @@ public class MarkerSQLiteOpenHelper extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + MARKER_TABLE);
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + GROUP_TABLE);
         onCreate(sqLiteDatabase);
+    }
+
+    // Only use for testing
+    public void resetTables() {
+        SQLiteDatabase database =  getWritableDatabase();
+        database.execSQL("DROP TABLE IF EXISTS " + MARKER_TABLE);
+        database.execSQL("DROP TABLE IF EXISTS " + GROUP_TABLE);
+
+        database.execSQL("CREATE TABLE IF NOT EXISTS " + MARKER_TABLE + " (" +
+                ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                URI + " TEXT, " +
+                TITLE + " TEXT, " +
+                LONGITUDE + " DOUBLE, " +
+                LATITUDE + " DOUBLE, " +
+                ORIGINAL_DATE + " LONG, " +
+                ADDED_DATE + " LONG, " +
+                GROUP_ID + " LONG" + ")");
+
+        database.execSQL("CREATE TABLE IF NOT EXISTS " + GROUP_TABLE + " (" +
+                ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                TITLE + " TEXT, " +
+                LONGITUDE + " DOUBLE, " +
+                LATITUDE + " DOUBLE, " +
+                MARKER_IDS + " TEXT, " +
+                ADDED_DATE + " LONG)");
+
+        database.execSQL("CREATE INDEX " + TITLE + " ON " + GROUP_TABLE + "(" + ID + ")");
     }
 
     public List<ImageMarker> saveImageMarkersToDB(MarkerGroup group) {
@@ -141,22 +173,64 @@ public class MarkerSQLiteOpenHelper extends SQLiteOpenHelper {
 
     public ArrayList<MarkerGroup> getGroups() {
         SQLiteDatabase database = this.getReadableDatabase();
-        List<MarkerGroup> groups = new ArrayList<>();
+        ArrayList<MarkerGroup> groups = new ArrayList<>();
 
         Cursor cursor = database.query(GROUP_TABLE, GROUP_COLUMNS, null, null,
                 null, null, null, null);
 
         while (cursor.moveToNext()) {
-            long id = cursor.getLong(cursor.getColumnIndex(ID));
+            int id = cursor.getInt(cursor.getColumnIndex(ID));
             String title = cursor.getString(cursor.getColumnIndex(TITLE));
             double longitude = cursor.getDouble(cursor.getColumnIndex(LONGITUDE));
             double latitude = cursor.getDouble(cursor.getColumnIndex(LATITUDE));
             String idString = cursor.getString(cursor.getColumnIndex(MARKER_IDS));
-            List<Long> idList = new ArrayList<String>(Arrays.asList(idString.split(","))).stream()
-                    .map(stringId -> Long.valueOf(stringId)).collect(Collectors.toList());
-            long addedDate = cursor.getLong(cursor.getColumnIndex(ADDED_DATE));
+            List<Integer> idList = new ArrayList<String>(Arrays.asList(idString.split(","))).stream()
+                    .map(Integer::valueOf).collect(Collectors.toList());
+            List<ImageMarker> markers = getMarkers(idList);
+            MarkerGroup group = new MarkerGroup(title, latitude, longitude);
+            group.setId(id);
+            group.setMarkers(markers);
+            groups.add(group);
         }
 
-        return new ArrayList<>();
+        return groups;
     }
+
+    public ArrayList<ImageMarker> getMarkers(List<Integer> ids) {
+        SQLiteDatabase database = this.getReadableDatabase();
+        ArrayList<ImageMarker> markers = new ArrayList<>();
+        String [] argArray = ids.stream().map(String::valueOf).collect(Collectors.toList()).toArray(new String[ids.size()]);
+        Cursor cursor = database.query(MARKER_TABLE, MARKER_COLUMNS,  ID + " IN (" + createPlaceHolders(ids.size()) + ")",
+                argArray, null, null, null, null);
+
+        while (cursor.moveToNext()) {
+            int id = cursor.getInt(cursor.getColumnIndex(ID));
+            Uri uri = Uri.parse(cursor.getString(cursor.getColumnIndex(URI)));
+            String title = cursor.getString(cursor.getColumnIndex(TITLE));
+            double longitude = cursor.getDouble(cursor.getColumnIndex(LONGITUDE));
+            double latitude = cursor.getDouble(cursor.getColumnIndex(LATITUDE));
+            long addedDate = cursor.getLong(cursor.getColumnIndex(ADDED_DATE));
+            long originalDate = cursor.getLong(cursor.getColumnIndex(ADDED_DATE));
+            int groupId = cursor.getInt(cursor.getColumnIndex(GROUP_ID));
+
+            markers.add(new ImageMarker(id, title, longitude, latitude, new Date(originalDate),
+                    new  Date(addedDate), uri, groupId));
+        }
+
+        return markers;
+    }
+
+    private String createPlaceHolders(int size) {
+        String placeholder = "";
+
+        for (int i = 0; i < size; i++) {
+            placeholder += "?";
+            if (i < size - 1) {
+                placeholder += ",";
+            }
+        }
+
+        return placeholder;
+    }
+
 }
