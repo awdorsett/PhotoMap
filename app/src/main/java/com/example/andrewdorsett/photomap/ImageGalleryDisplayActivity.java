@@ -12,6 +12,7 @@ import android.text.Layout;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.RelativeLayout;
 
 import java.util.List;
@@ -56,9 +57,11 @@ public class ImageGalleryDisplayActivity extends AppCompatActivity {
 
                 // Set an image for ImageView
                 iv.setImageURI(uri);
-
+                iv.setPadding(0,5,0,0);
+                iv.setScaleType(ImageView.ScaleType.FIT_XY);
+                iv.setAdjustViewBounds(true);
                 // Create layout parameters for ImageView
-                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+               LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
 
                 // Add layout parameters to ImageView
                 iv.setLayoutParams(lp);

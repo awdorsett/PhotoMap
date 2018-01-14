@@ -128,4 +128,23 @@ public class ImageMarker implements Parcelable {
         this.imageUri = Uri.parse(in.readString());
         this.groupId = in.readInt();
     }
+
+    @Override
+    public int hashCode() {
+        int hash = 37;
+        hash += id;
+        hash += imageUri.hashCode();
+        hash += latLng.hashCode();
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object second) {
+        if (second instanceof ImageMarker) {
+            return this.id == ((ImageMarker) second).id
+                    && this.imageUri.equals(((ImageMarker) second).getImageUri())
+                    && this.latLng.equals(((ImageMarker) second).latLng);
+        }
+        return false;
+    }
 }

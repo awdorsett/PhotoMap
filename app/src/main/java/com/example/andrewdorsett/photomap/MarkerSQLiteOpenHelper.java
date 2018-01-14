@@ -3,6 +3,7 @@ package com.example.andrewdorsett.photomap;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQuery;
@@ -22,7 +23,7 @@ import java.util.stream.Collectors;
  */
 
 public class MarkerSQLiteOpenHelper extends SQLiteOpenHelper {
-    public static final String PHOTO_MAP_DB = "photoMap2";
+    public static final String PHOTO_MAP_DB = "photoMap3";
 
     public static final String MARKER_TABLE = "markers";
     public static final String GROUP_TABLE = "groups";
@@ -116,10 +117,11 @@ public class MarkerSQLiteOpenHelper extends SQLiteOpenHelper {
                 ADDED_DATE + " LONG)");
 
         database.execSQL("CREATE INDEX " + TITLE + " ON " + GROUP_TABLE + "(" + ID + ")");
+        //database.close();
     }
 
     public List<ImageMarker> saveImageMarkersToDB(MarkerGroup group) {
-        SQLiteDatabase database = this.getWritableDatabase();
+        SQLiteDatabase database = getDatabase();
         List<ImageMarker> markers = group.getMarkers();
 
         database.beginTransaction();
@@ -139,12 +141,13 @@ public class MarkerSQLiteOpenHelper extends SQLiteOpenHelper {
         }
         database.setTransactionSuccessful();
         database.endTransaction();
+        //database.close();
 
         return markers;
     }
 
     public List<MarkerGroup> saveGroupToDB(List<MarkerGroup> groups) {
-        SQLiteDatabase database = this.getWritableDatabase();
+        SQLiteDatabase database = getDatabase();
         database.beginTransaction();
 
         for(MarkerGroup group : groups) {
@@ -166,12 +169,13 @@ public class MarkerSQLiteOpenHelper extends SQLiteOpenHelper {
 
         database.setTransactionSuccessful();
         database.endTransaction();
+        //database.close();
 
         return groups;
     }
 
     public ArrayList<MarkerGroup> getGroups() {
-        SQLiteDatabase database = this.getReadableDatabase();
+        SQLiteDatabase database = getDatabase();
         ArrayList<MarkerGroup> groups = new ArrayList<>();
 
         Cursor cursor = database.query(GROUP_TABLE, GROUP_COLUMNS, null, null,
@@ -191,17 +195,18 @@ public class MarkerSQLiteOpenHelper extends SQLiteOpenHelper {
             group.setMarkers(markers);
             groups.add(group);
         }
+        //database.close();
+        cursor.close();
 
         return groups;
     }
 
     public ArrayList<ImageMarker> getMarkers(List<Integer> ids) {
-        SQLiteDatabase database = this.getReadableDatabase();
+        SQLiteDatabase database = getDatabase();
         ArrayList<ImageMarker> markers = new ArrayList<>();
         String [] argArray = ids.stream().map(String::valueOf).collect(Collectors.toList()).toArray(new String[ids.size()]);
         Cursor cursor = database.query(MARKER_TABLE, MARKER_COLUMNS,  ID + " IN (" + createPlaceHolders(ids.size()) + ")",
                 argArray, null, null, null, null);
-
         while (cursor.moveToNext()) {
             int id = cursor.getInt(cursor.getColumnIndex(ID));
             Uri uri = Uri.parse(cursor.getString(cursor.getColumnIndex(URI)));
@@ -215,7 +220,8 @@ public class MarkerSQLiteOpenHelper extends SQLiteOpenHelper {
             markers.add(new ImageMarker(id, title, longitude, latitude, new Date(originalDate),
                     new  Date(addedDate), uri, groupId));
         }
-
+        //database.close();
+        cursor.close();
         return markers;
     }
 
@@ -230,6 +236,17 @@ public class MarkerSQLiteOpenHelper extends SQLiteOpenHelper {
         }
 
         return placeholder;
+    }
+
+    private SQLiteDatabase getDatabase() {
+        SQLiteDatabase db = null;
+        try {
+            db = this.getWritableDatabase();
+        } catch (SQLException s) {
+            //throw new Exception("Error with DB Open");
+        }
+
+        return db;
     }
 
 }

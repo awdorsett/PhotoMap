@@ -107,15 +107,15 @@ public class MainActivity extends AppCompatActivity {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         ArrayList<ImageMarker> imageMarkers = new ArrayList<>();
         MarkerSQLiteOpenHelper db = new MarkerSQLiteOpenHelper(this);
-//        getGroupsFromDB();
-        if (requestCode == PICK_IMAGE) {
+
+        if (requestCode == PICK_IMAGE && data != null) {
             if (data.getData() != null) {
                 ImageMarker marker = getMarker(data.getData(), data);
                 if (marker != null) {
                     imageMarkers.add(marker);
                     addImageMarkerToGroup(marker);
                 }
-            } else if (data.getClipData() != null) {
+            } else if (data.getClipData() != null ) {
                 ClipData clipData = data.getClipData();
                 for (int i = 0; i < clipData.getItemCount(); i++) {
                     ImageMarker marker = getMarker(clipData.getItemAt(i).getUri(), data);
