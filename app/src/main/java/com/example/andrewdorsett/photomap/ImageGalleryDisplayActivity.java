@@ -1,5 +1,6 @@
 package com.example.andrewdorsett.photomap;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
@@ -45,6 +46,7 @@ public class ImageGalleryDisplayActivity extends AppCompatActivity {
         } else {
             layout.setTitle("Photos");
         }
+
 
         if (getIntent().hasExtra("uris")) {
             List<Uri> uris = getIntent().getParcelableArrayListExtra("uris");

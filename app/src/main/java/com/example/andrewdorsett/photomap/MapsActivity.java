@@ -20,6 +20,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static android.content.Intent.ACTION_OPEN_DOCUMENT;
+
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
 
     private GoogleMap mMap;
@@ -88,6 +90,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             // TODO update key to static
             intent.putExtra("group_title", markerMap.get(marker).getKey());
             intent.putParcelableArrayListExtra("uris", imageUris);
+            intent.setAction(ACTION_OPEN_DOCUMENT);
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             startActivity(intent);
         }
 

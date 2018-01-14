@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static android.content.Intent.ACTION_OPEN_DOCUMENT;
 import static com.drew.metadata.exif.ExifDirectoryBase.TAG_DATETIME_ORIGINAL;
 
 public class MainActivity extends AppCompatActivity {
@@ -83,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
         // TODO move the save to DB
         sqlHelper.saveGroupToDB(groups);
         Intent intent = new Intent(this, MapsActivity.class);
-
+        intent.setAction(ACTION_OPEN_DOCUMENT);
         // TODO update key with static enum
         if (groups.size() > 0) {
             intent.putParcelableArrayListExtra("groups", groups);
@@ -95,7 +96,8 @@ public class MainActivity extends AppCompatActivity {
     public void launchGallery(View view) {
         Intent intent = new Intent();
         intent.setType("image/*");
-        intent.setAction(Intent.ACTION_GET_CONTENT);
+        intent.setAction(Intent.ACTION_OPEN_DOCUMENT);
+        intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
         intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
         startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE);
     }
@@ -108,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
 //        getGroupsFromDB();
         if (requestCode == PICK_IMAGE) {
             if (data.getData() != null) {
-                ImageMarker marker = getMarker(data.getData());
+                ImageMarker marker = getMarker(data.getData(), data);
                 if (marker != null) {
                     imageMarkers.add(marker);
                     addImageMarkerToGroup(marker);
@@ -116,7 +118,7 @@ public class MainActivity extends AppCompatActivity {
             } else if (data.getClipData() != null) {
                 ClipData clipData = data.getClipData();
                 for (int i = 0; i < clipData.getItemCount(); i++) {
-                    ImageMarker marker = getMarker(clipData.getItemAt(i).getUri());
+                    ImageMarker marker = getMarker(clipData.getItemAt(i).getUri(), data);
                     if (marker != null) {
                         imageMarkers.add(marker);
                         addImageMarkerToGroup(marker);
@@ -128,9 +130,15 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private ImageMarker getMarker(Uri imageUri) {
+    private ImageMarker getMarker(Uri imageUri, Intent intent) {
         ImageMarker marker = new ImageMarker();
         marker.setImageUri(imageUri);
+
+        final int takeFlags = intent.getFlags()
+                & (Intent.FLAG_GRANT_READ_URI_PERMISSION
+                | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+            // Check for the freshest data.
+            getContentResolver().takePersistableUriPermission(imageUri, takeFlags);
 
             try {
                 InputStream in = getContentResolver().openInputStream(imageUri);

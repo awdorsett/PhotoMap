@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
  */
 
 public class MarkerSQLiteOpenHelper extends SQLiteOpenHelper {
-    public static final String PHOTO_MAP_DB = "photoMap";
+    public static final String PHOTO_MAP_DB = "photoMap2";
 
     public static final String MARKER_TABLE = "markers";
     public static final String GROUP_TABLE = "groups";
