@@ -48,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
 
         Button imageButton = (Button) findViewById(R.id.imageButton);
         Button mapButton = (Button) findViewById(R.id.mapButton);
+        //sqlHelper.resetTables(); // FOR TESTING
         groups = sqlHelper.getGroups();
 
         if (groups.size() > 0) {

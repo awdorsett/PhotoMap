@@ -36,6 +36,7 @@
 
     <include
         layout="@layout/content_image_gallery_display"
+        android:id="@+id/include_container"
         android:layout_width="match_parent" />
 
     <android.support.design.widget.FloatingActionButton
@@ -43,8 +44,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/fab_margin"
-        app:layout_anchor="@id/app_bar"
+        app:layout_anchor="@id/include_container"
         app:layout_anchorGravity="bottom|end"
-        app:srcCompat="@android:drawable/ic_dialog_email" />
+        app:srcCompat="@drawable/ic_action_name" />
 
 </android.support.design.widget.CoordinatorLayout>
