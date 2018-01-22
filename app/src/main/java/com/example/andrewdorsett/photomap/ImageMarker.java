@@ -5,6 +5,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.maps.android.clustering.ClusterItem;
 
 import java.util.Date;
 
@@ -12,7 +13,7 @@ import java.util.Date;
  * Created by admin on 12/26/17.
  */
 
-public class ImageMarker implements Parcelable {
+public class ImageMarker implements Parcelable, ClusterItem {
     public static final Integer DEFAULT_GROUP_ID = 1;
     private long id = -1;
     private String title;
@@ -54,15 +55,22 @@ public class ImageMarker implements Parcelable {
         this.id = id;
     }
 
+
     public String getTitle() {
         return title;
+    }
+
+    @Override
+    public String getSnippet() {
+        return getTitle();
     }
 
     public void setTitle(String title) {
         this.title = title;
     }
 
-    public LatLng getLatLng() {
+    @Override
+    public LatLng getPosition() {
         return latLng;
     }
 

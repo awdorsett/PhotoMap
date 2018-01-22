@@ -6,8 +6,6 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.database.sqlite.SQLiteQuery;
-import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 
 import com.google.common.base.Joiner;
@@ -129,8 +127,8 @@ public class MarkerSQLiteOpenHelper extends SQLiteOpenHelper {
             ContentValues values = new ContentValues();
             values.put(URI, marker.getImageUri().toString());
             values.put(TITLE, marker.getTitle());
-            values.put(LONGITUDE, marker.getLatLng().longitude);
-            values.put(LATITUDE, marker.getLatLng().latitude);
+            values.put(LONGITUDE, marker.getPosition().longitude);
+            values.put(LATITUDE, marker.getPosition().latitude);
             values.put(ORIGINAL_DATE, marker.getOriginalDate().getTime());
             values.put(ADDED_DATE, marker.getAddedDate().getTime());
             values.put(ADDED_DATE, System.currentTimeMillis());
@@ -152,9 +150,12 @@ public class MarkerSQLiteOpenHelper extends SQLiteOpenHelper {
 
         for(MarkerGroup group : groups) {
             ContentValues values = new ContentValues();
+            if (group.getId() > 0) {
+                values.put(ID, group.getId());
+            }
             values.put(TITLE, group.getKey());
-            values.put(LONGITUDE, group.getLatLng().longitude);
-            values.put(LATITUDE, group.getLatLng().latitude);
+            values.put(LONGITUDE, group.getPosition().longitude);
+            values.put(LATITUDE, group.getPosition().latitude);
             saveImageMarkersToDB(group);
             List<Long> markerList = group.getMarkers().stream()
                     .map(ImageMarker::getId).collect(Collectors.toList());

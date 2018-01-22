@@ -4,6 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.maps.android.clustering.ClusterItem;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +13,7 @@ import java.util.List;
  * Created by admin on 12/31/17.
  */
 
-public class MarkerGroup implements Parcelable {
+public class MarkerGroup implements Parcelable, ClusterItem {
     private List<ImageMarker> markers = new ArrayList<>();
     private long id = -1;
     private String key;
@@ -69,11 +70,12 @@ public class MarkerGroup implements Parcelable {
         return key;
     }
 
-    public LatLng getLatLng() {
+    @Override
+    public LatLng getPosition() {
         return latLng;
     }
 
-    public void setLatLng(double latitude, double longitude) {
+    public void setPosition(double latitude, double longitude) {
         latLng = new LatLng(latitude, longitude);
     }
 
@@ -89,5 +91,15 @@ public class MarkerGroup implements Parcelable {
         parcel.writeString(key);
         parcel.writeDouble(latLng.latitude);
         parcel.writeDouble(latLng.longitude);
+    }
+
+    @Override
+    public String getTitle() {
+        return key;
+    }
+
+    @Override
+    public String getSnippet() {
+        return getTitle();
     }
 }

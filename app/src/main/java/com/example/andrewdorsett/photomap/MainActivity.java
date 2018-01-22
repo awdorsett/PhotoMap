@@ -1,9 +1,7 @@
 package com.example.andrewdorsett.photomap;
 
 import android.content.ClipData;
-import android.content.ContentValues;
 import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
 import android.location.Address;
 import android.location.Geocoder;
 import android.net.Uri;
@@ -14,20 +12,16 @@ import android.widget.Button;
 
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.metadata.Metadata;
-import com.drew.metadata.exif.ExifImageDirectory;
 import com.drew.metadata.exif.ExifSubIFDDirectory;
 import com.drew.metadata.exif.GpsDirectory;
-import com.google.android.gms.maps.model.LatLng;
 
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static android.content.Intent.ACTION_OPEN_DOCUMENT;
-import static com.drew.metadata.exif.ExifDirectoryBase.TAG_DATETIME_ORIGINAL;
 
 public class MainActivity extends AppCompatActivity {
     private static int PICK_IMAGE = 101;
@@ -48,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
 
         Button imageButton = (Button) findViewById(R.id.imageButton);
         Button mapButton = (Button) findViewById(R.id.mapButton);
-        //sqlHelper.resetTables(); // FOR TESTING
+//        sqlHelper.resetTables(); // FOR TESTING
         groups = sqlHelper.getGroups();
 
         if (groups.size() > 0) {
@@ -184,8 +178,8 @@ public class MainActivity extends AppCompatActivity {
         // TODO catch appropriate exception
         try {
             List<Address> addresses = geocoder.getFromLocation(
-                    marker.getLatLng().latitude,
-                    marker.getLatLng().longitude,
+                    marker.getPosition().latitude,
+                    marker.getPosition().longitude,
                     1);
             if (addresses.size() > 0) {
                 Address address = addresses.get(0);
