@@ -14,6 +14,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.maps.android.clustering.Cluster;
 import com.google.maps.android.clustering.ClusterManager;
 
 import java.util.ArrayList;
@@ -26,8 +27,7 @@ import static android.content.Intent.ACTION_OPEN_DOCUMENT;
 
 public class MapsActivity extends FragmentActivity implements
         OnMapReadyCallback,
-        GoogleMap.OnMarkerClickListener,
-        GoogleMap.OnCameraMoveStartedListener {
+        ClusterManager.OnClusterItemClickListener<MarkerGroup>{
 
     private GoogleMap mMap;
     private List<MarkerGroup> groups = new ArrayList<>();
@@ -61,15 +61,6 @@ public class MapsActivity extends FragmentActivity implements
         });
     }
 
-    @Override
-    public void onCameraMoveStarted(int reason) {
-        if (reason == REASON_GESTURE) {
-            for(Marker marker : markerMap.keySet()){
-//                marker.setVisible(mMap.getCameraPosition().zoom > zoomPositionForDisplay);
-            }
-        }
-    }
-
 
     /**
      * Manipulates the map once available.
@@ -89,32 +80,31 @@ public class MapsActivity extends FragmentActivity implements
             Marker mapMarker = mMap.addMarker(new MarkerOptions()
                     .position(groupLoc)
                     .title(group.getKey()));
-            mapMarker.setVisible(mMap.getCameraPosition().zoom > zoomPositionForDisplay);
+            mapMarker.setVisible(false);
             markerMap.put(mapMarker, group);
             mMap.moveCamera(CameraUpdateFactory.newLatLng(groupLoc));
         }
 
-        mMap.setOnMarkerClickListener(this);
+//        mMap.setOnMarkerClickListener(this);
         setUpClusterer();
-
-        mMap.setOnCameraMoveStartedListener(this);
     }
 
+    //implement the onClusterItemClick interface
     @Override
-    public boolean onMarkerClick(Marker marker) {
-        if (markerMap.containsKey(marker)) {
+    public boolean onClusterItemClick(MarkerGroup clusterItem){
+//        if (markerMap.containsKey(marker)) {
             ArrayList<Uri> imageUris = new ArrayList<>();
-            for (ImageMarker imageMarker : markerMap.get(marker).getMarkers()) {
+            for (ImageMarker imageMarker : clusterItem.getMarkers()) {
                 imageUris.add(imageMarker.getImageUri());
             }
             Intent intent = new Intent(this, ImageGalleryDisplayActivity.class);
             // TODO update key to static
-            intent.putExtra("group_title", markerMap.get(marker).getKey());
+            intent.putExtra("group_title", clusterItem.getKey());
             intent.putParcelableArrayListExtra("uris", imageUris);
             intent.setAction(ACTION_OPEN_DOCUMENT);
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             startActivity(intent);
-        }
+//        }
 
         return false;
     }
@@ -142,6 +132,22 @@ public class MapsActivity extends FragmentActivity implements
         // Add cluster items (markers) to the cluster manager.
         clusterManager.addItems(markerMap.values());
         clusterManager.setRenderer(new MarkerClusterRenderer(this, mMap, clusterManager));
+        clusterManager.setOnClusterItemClickListener(this);
+
+        clusterManager
+                .setOnClusterClickListener(new ClusterManager.OnClusterClickListener<MarkerGroup>() {
+                    @Override
+                    public boolean onClusterClick(final Cluster<MarkerGroup> cluster) {
+                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
+                                cluster.getPosition(), (float) Math.floor(mMap
+                                        .getCameraPosition().zoom + 1)), 300,
+                                null);
+                        return true;
+                    }
+                });
 
     }
+
+
+
 }
