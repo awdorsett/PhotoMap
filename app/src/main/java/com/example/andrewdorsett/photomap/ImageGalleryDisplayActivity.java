@@ -58,22 +58,17 @@ public class ImageGalleryDisplayActivity extends AppCompatActivity {
 
             for (Uri uri : uris) {
                 ImageView iv = new ImageView(getApplicationContext());
-                Bitmap bm = null;
-                try {
-                    bm = MediaStore.Images.Media.getBitmap(this.getContentResolver(), uri);
-                } catch (IOException e) {
-                    // TODO handle real exception
-                }
 
-                bm = Bitmap.createScaledBitmap(bm, metrics.widthPixels, getHeight(bm, metrics), false);
-                // Set an image for ImageView
-//                iv.setImageURI(uri);
+                Bitmap bm = ImageResizeUtil.getScaledBitMap(this.getContentResolver(), uri, metrics);
+
                 iv.setImageBitmap(bm);
                 iv.setPadding(0,5,0,0);
                 iv.setScaleType(ImageView.ScaleType.FIT_XY);
                 iv.setAdjustViewBounds(true);
                 // Create layout parameters for ImageView
-               LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+               LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                       LinearLayout.LayoutParams.MATCH_PARENT,
+                       LinearLayout.LayoutParams.WRAP_CONTENT);
 
                 // Add layout parameters to ImageView
                 iv.setLayoutParams(lp);
@@ -85,13 +80,4 @@ public class ImageGalleryDisplayActivity extends AppCompatActivity {
         }
     }
 
-    private int getHeight(Bitmap bm, DisplayMetrics dm) {
-        int newHeight = bm.getHeight();
-        if (bm.getWidth() > dm.widthPixels) {
-            double ratio = dm.widthPixels / (double) bm.getWidth();
-            newHeight = (int) Math.round(bm.getHeight() * ratio);
-        }
-
-        return newHeight;
-    }
 }

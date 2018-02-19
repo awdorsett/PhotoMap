@@ -102,4 +102,24 @@ public class MarkerGroup implements Parcelable, ClusterItem {
     public String getSnippet() {
         return getTitle();
     }
+
+    @Override
+    public int hashCode() {
+        return (int) getId() + (key != null ? key.hashCode() : 0);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (key == null) {
+            return false;
+        }
+        if (obj == null) {
+            return false;
+        } else if (this.getClass() != obj.getClass()) {
+            return false;
+        }
+
+
+        return this.id == ((MarkerGroup) obj).id && this.key.equals(((MarkerGroup) obj).key);
+    }
 }

@@ -6,6 +6,7 @@ import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ListView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -34,6 +35,7 @@ public class MapsActivity extends FragmentActivity implements
     private Map<Marker, MarkerGroup> markerMap = new HashMap<>();
     private ClusterManager<MarkerGroup> clusterManager;
     private int zoomPositionForDisplay = 8;
+    private MarkerGroup selectedGroup;
 
 
     @Override
@@ -49,9 +51,11 @@ public class MapsActivity extends FragmentActivity implements
         if (intent.hasExtra("groups")) {
             groups = intent.getParcelableArrayListExtra("groups");
         }
+        if (intent.hasExtra("selectedGroup")) {
+            selectedGroup = intent.getParcelableExtra("selectedGroup");
+        }
 
         Button addImage = findViewById(R.id.addImageButton);
-
         addImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -82,10 +86,11 @@ public class MapsActivity extends FragmentActivity implements
                     .title(group.getKey()));
             mapMarker.setVisible(false);
             markerMap.put(mapMarker, group);
-            mMap.moveCamera(CameraUpdateFactory.newLatLng(groupLoc));
+            if (selectedGroup == null || group.equals(selectedGroup)) {
+                mMap.moveCamera(CameraUpdateFactory.newLatLng(groupLoc));
+            }
         }
 
-//        mMap.setOnMarkerClickListener(this);
         setUpClusterer();
     }
 
@@ -147,7 +152,4 @@ public class MapsActivity extends FragmentActivity implements
                 });
 
     }
-
-
-
 }

@@ -8,7 +8,9 @@ import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.ListView;
 
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.metadata.Metadata;
@@ -40,14 +42,23 @@ public class MainActivity extends AppCompatActivity {
         sqlHelper = new MarkerSQLiteOpenHelper(this);
         geocoder = new Geocoder(this);
 
-        Button imageButton = (Button) findViewById(R.id.imageButton);
-        Button mapButton = (Button) findViewById(R.id.mapButton);
+        Button imageButton = findViewById(R.id.imageButton);
+        Button mapButton = findViewById(R.id.mapButton);
 //        sqlHelper.resetTables(); // FOR TESTING
         groups = sqlHelper.getGroups();
 
-        if (groups.size() > 0) {
-            launchMaps(null);
-        }
+//        if (groups.size() > 0) {
+//            launchMaps(null, null);
+//        }
+
+        ListView groupList = findViewById(R.id.group_list);
+        GroupListAdapter groupListAdapter = new GroupListAdapter(groupList.getContext(), groups);
+        groupList.setAdapter(groupListAdapter);
+        groupList.setOnItemClickListener((adapterView, view, pos, id) -> {
+            MarkerGroup group = groups.get(pos);
+            launchMaps(adapterView, group);
+
+        });
 
         imageButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -58,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
         mapButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                launchMaps(view);
+                launchMaps(view, null);
             }
         });
 
@@ -75,14 +86,16 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    public void launchMaps(View view) {
+    public void launchMaps(View view, MarkerGroup selectedGroup) {
         // TODO move the save to DB
-        sqlHelper.saveGroupToDB(groups);
         Intent intent = new Intent(this, MapsActivity.class);
         intent.setAction(ACTION_OPEN_DOCUMENT);
         // TODO update key with static enum
         if (groups.size() > 0) {
             intent.putParcelableArrayListExtra("groups", groups);
+        }
+        if (selectedGroup != null) {
+            intent.putExtra("selectedGroup", selectedGroup);
         }
 
         startActivity(intent);
@@ -120,6 +133,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
             }
+            sqlHelper.saveGroupToDB(groups);
         } else if (requestCode == OPEN_IMAGE_SELECT) {
             launchGallery(null);
         }
