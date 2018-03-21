@@ -9,7 +9,7 @@ import android.util.DisplayMetrics;
 import java.io.IOException;
 
 /**
- * Created by admin on 2/18/18.
+ * Created by andrew dorsett on 2/18/18.
  */
 
 public class ImageResizeUtil {

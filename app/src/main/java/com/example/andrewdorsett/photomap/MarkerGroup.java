@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by admin on 12/31/17.
+ * Created by andrew dorsett on 12/31/17.
  */
 
 public class MarkerGroup implements Parcelable, ClusterItem {

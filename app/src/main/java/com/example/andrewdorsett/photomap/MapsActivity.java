@@ -25,6 +25,11 @@ import java.util.List;
 import java.util.Map;
 
 import static android.content.Intent.ACTION_OPEN_DOCUMENT;
+import static com.example.andrewdorsett.photomap.Constants.GROUPS_KEY;
+import static com.example.andrewdorsett.photomap.Constants.OPEN_IMAGE_SELECT;
+import static com.example.andrewdorsett.photomap.Constants.SELECT_GROUP_KEY;
+import static com.example.andrewdorsett.photomap.Constants.TITLE_KEY;
+import static com.example.andrewdorsett.photomap.Constants.URI_KEY;
 
 public class MapsActivity extends FragmentActivity implements
         OnMapReadyCallback,
@@ -48,33 +53,20 @@ public class MapsActivity extends FragmentActivity implements
         mapFragment.getMapAsync(this);
 
         Intent intent = getIntent();
-        if (intent.hasExtra("groups")) {
-            groups = intent.getParcelableArrayListExtra("groups");
+        if (intent.hasExtra(GROUPS_KEY)) {
+            groups = intent.getParcelableArrayListExtra(GROUPS_KEY);
         }
-        if (intent.hasExtra("selectedGroup")) {
-            selectedGroup = intent.getParcelableExtra("selectedGroup");
+        if (intent.hasExtra(SELECT_GROUP_KEY)) {
+            selectedGroup = intent.getParcelableExtra(SELECT_GROUP_KEY);
         }
 
         Button addImage = findViewById(R.id.addImageButton);
-        addImage.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                setResult(102);
-                finish();
-            }
+        addImage.setOnClickListener(view -> {
+            setResult(OPEN_IMAGE_SELECT);
+            finish();
         });
     }
 
-
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
@@ -97,30 +89,20 @@ public class MapsActivity extends FragmentActivity implements
     //implement the onClusterItemClick interface
     @Override
     public boolean onClusterItemClick(MarkerGroup clusterItem){
-//        if (markerMap.containsKey(marker)) {
-            ArrayList<Uri> imageUris = new ArrayList<>();
-            for (ImageMarker imageMarker : clusterItem.getMarkers()) {
-                imageUris.add(imageMarker.getImageUri());
-            }
-            Intent intent = new Intent(this, ImageGalleryDisplayActivity.class);
-            // TODO update key to static
-            intent.putExtra("group_title", clusterItem.getKey());
-            intent.putParcelableArrayListExtra("uris", imageUris);
-            intent.setAction(ACTION_OPEN_DOCUMENT);
-            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            startActivity(intent);
-//        }
+        ArrayList<Uri> imageUris = new ArrayList<>();
+
+        for (ImageMarker imageMarker : clusterItem.getMarkers()) {
+            imageUris.add(imageMarker.getImageUri());
+        }
+
+        Intent intent = new Intent(this, ImageGalleryDisplayActivity.class);
+        intent.putExtra(TITLE_KEY, clusterItem.getKey());
+        intent.putParcelableArrayListExtra(URI_KEY, imageUris);
+        intent.setAction(ACTION_OPEN_DOCUMENT);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        startActivity(intent);
 
         return false;
-    }
-
-    @Override
-    public void onPointerCaptureChanged(boolean hasCapture) {
-
-    }
-
-    private void launchImageSelect() {
-        finishActivity(102);
     }
 
     private void setUpClusterer() {
@@ -140,15 +122,12 @@ public class MapsActivity extends FragmentActivity implements
         clusterManager.setOnClusterItemClickListener(this);
 
         clusterManager
-                .setOnClusterClickListener(new ClusterManager.OnClusterClickListener<MarkerGroup>() {
-                    @Override
-                    public boolean onClusterClick(final Cluster<MarkerGroup> cluster) {
-                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
-                                cluster.getPosition(), (float) Math.floor(mMap
-                                        .getCameraPosition().zoom + 1)), 300,
-                                null);
-                        return true;
-                    }
+                .setOnClusterClickListener(cluster -> {
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
+                            cluster.getPosition(), (float) Math.floor(mMap
+                                    .getCameraPosition().zoom + 1)), 300,
+                            null);
+                    return true;
                 });
 
     }

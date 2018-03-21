@@ -3,15 +3,12 @@ package com.example.andrewdorsett.photomap;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
-import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
-
-import com.google.android.gms.maps.model.Marker;
 
 import java.util.HashMap;
 import java.util.List;

@@ -7,8 +7,8 @@ import android.location.Geocoder;
 import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 
@@ -24,11 +24,13 @@ import java.util.HashMap;
 import java.util.List;
 
 import static android.content.Intent.ACTION_OPEN_DOCUMENT;
+import static com.example.andrewdorsett.photomap.Constants.GROUPS_KEY;
+import static com.example.andrewdorsett.photomap.Constants.OPEN_IMAGE_SELECT;
+import static com.example.andrewdorsett.photomap.Constants.PICK_IMAGE;
+import static com.example.andrewdorsett.photomap.Constants.SELECT_GROUP_KEY;
 
 public class MainActivity extends AppCompatActivity {
-    private static int PICK_IMAGE = 101;
-    private static int OPEN_IMAGE_SELECT = 102;
-//    private ArrayList<ImageMarker> imageMarkers = new ArrayList<>();
+    private static String TAG = "MainActivity";
     private ArrayList<MarkerGroup> groups = new ArrayList<>();
     private HashMap<String, MarkerGroup> groupMap = new HashMap<>();
     private Date latestDate = null;
@@ -44,12 +46,8 @@ public class MainActivity extends AppCompatActivity {
 
         Button imageButton = findViewById(R.id.imageButton);
         Button mapButton = findViewById(R.id.mapButton);
-//        sqlHelper.resetTables(); // FOR TESTING
+//      sqlHelper.resetTables(); // FOR TESTING
         groups = sqlHelper.getGroups();
-
-//        if (groups.size() > 0) {
-//            launchMaps(null, null);
-//        }
 
         ListView groupList = findViewById(R.id.group_list);
         GroupListAdapter groupListAdapter = new GroupListAdapter(groupList.getContext(), groups);
@@ -60,42 +58,28 @@ public class MainActivity extends AppCompatActivity {
 
         });
 
-        imageButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                launchGallery(view);
-            }
-        });
-        mapButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                launchMaps(view, null);
-            }
-        });
+        imageButton.setOnClickListener(view -> launchGallery(view));
 
-        // Drop tables for testing only
+        mapButton.setOnClickListener(view -> launchMaps(view, null));
+
         // TODO Remove after testing is done
-        // sqlHelper.resetTables();
         Button resetButton = findViewById(R.id.resetButton);
-        resetButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                groups = new ArrayList<>();
-                sqlHelper.resetTables();
-            }
+        resetButton.setOnClickListener(view -> {
+            groups = new ArrayList<>();
+            sqlHelper.resetTables();
         });
     }
 
     public void launchMaps(View view, MarkerGroup selectedGroup) {
-        // TODO move the save to DB
         Intent intent = new Intent(this, MapsActivity.class);
         intent.setAction(ACTION_OPEN_DOCUMENT);
-        // TODO update key with static enum
+
         if (groups.size() > 0) {
-            intent.putParcelableArrayListExtra("groups", groups);
+            intent.putParcelableArrayListExtra(GROUPS_KEY, groups);
         }
+
         if (selectedGroup != null) {
-            intent.putExtra("selectedGroup", selectedGroup);
+            intent.putExtra(SELECT_GROUP_KEY, selectedGroup);
         }
 
         startActivity(intent);
@@ -113,79 +97,82 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        ArrayList<ImageMarker> imageMarkers = new ArrayList<>();
-        MarkerSQLiteOpenHelper db = new MarkerSQLiteOpenHelper(this);
 
         if (requestCode == PICK_IMAGE && data != null) {
             if (data.getData() != null) {
-                ImageMarker marker = getMarker(data.getData(), data);
+                ImageMarker marker = constructImageMarker(data.getData(), data);
+
                 if (marker != null) {
-                    imageMarkers.add(marker);
                     addImageMarkerToGroup(marker);
                 }
             } else if (data.getClipData() != null ) {
                 ClipData clipData = data.getClipData();
+
                 for (int i = 0; i < clipData.getItemCount(); i++) {
-                    ImageMarker marker = getMarker(clipData.getItemAt(i).getUri(), data);
+                    ImageMarker marker = constructImageMarker(clipData.getItemAt(i).getUri(), data);
                     if (marker != null) {
-                        imageMarkers.add(marker);
                         addImageMarkerToGroup(marker);
                     }
                 }
             }
+
             sqlHelper.saveGroupToDB(groups);
         } else if (requestCode == OPEN_IMAGE_SELECT) {
             launchGallery(null);
         }
+
     }
 
-    private ImageMarker getMarker(Uri imageUri, Intent intent) {
-        ImageMarker marker = new ImageMarker();
-        marker.setImageUri(imageUri);
+    private ImageMarker constructImageMarker(Uri imageUri, Intent intent) {
 
+        // Persist read permission on image
         final int takeFlags = intent.getFlags()
-                & (Intent.FLAG_GRANT_READ_URI_PERMISSION
-                | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-            // Check for the freshest data.
-            getContentResolver().takePersistableUriPermission(imageUri, takeFlags);
+                & (Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
 
-            try {
-                InputStream in = getContentResolver().openInputStream(imageUri);
+        getContentResolver().takePersistableUriPermission(imageUri, takeFlags);
 
-                Metadata metadata = ImageMetadataReader.readMetadata(in);
+        // Get geo location and date information
+        try {
+            ImageMarker marker = new ImageMarker();
+            marker.setImageUri(imageUri);
+            InputStream in = getContentResolver().openInputStream(imageUri);
+            Metadata metadata = ImageMetadataReader.readMetadata(in);
 
-                // Set location
-                if (metadata.getDirectoriesOfType(GpsDirectory.class) != null) {
-                    GpsDirectory directory =
-                            metadata.getDirectoriesOfType(GpsDirectory.class).iterator().next();
+            // Set location
+            if (metadata.getDirectoriesOfType(GpsDirectory.class) != null) {
+                GpsDirectory directory =
+                        metadata.getDirectoriesOfType(GpsDirectory.class).iterator().next();
 
-                    marker.setLatLng(directory.getGeoLocation().getLatitude(),
-                            directory.getGeoLocation().getLongitude());
+                marker.setLatLng(directory.getGeoLocation().getLatitude(),
+                        directory.getGeoLocation().getLongitude());
 
 
-                    // Set Exif data
-                    if (metadata.containsDirectoryOfType(ExifSubIFDDirectory.class)) {
-                        ExifSubIFDDirectory imageDirectory = metadata
-                                .getDirectoriesOfType(ExifSubIFDDirectory.class).iterator().next();
+                // Set Exif data
+                if (metadata.containsDirectoryOfType(ExifSubIFDDirectory.class)) {
+                    ExifSubIFDDirectory imageDirectory = metadata
+                            .getDirectoriesOfType(ExifSubIFDDirectory.class).iterator().next();
 
-                        marker.setTitle(imageDirectory.getName());
+                    marker.setTitle(imageDirectory.getName());
 
-                        Date imageDate = imageDirectory.getDateOriginal();
-                        marker.setOriginalDate(imageDate);
-                        marker.setAddedDate(new Date());
+                    Date imageDate = imageDirectory.getDateOriginal();
+                    marker.setOriginalDate(imageDate);
+                    marker.setAddedDate(new Date());
 
-                        if (latestDate == null) {
-                            latestDate = imageDate;
-                        } else if (imageDate.getTime() > latestDate.getTime()) {
-                            latestDate = imageDate;
-                        }
+                    if (latestDate == null || imageDate.getTime() > latestDate.getTime()) {
+                        latestDate = imageDate;
                     }
                 }
-            } catch (Exception e) {
-
+            } else {
+                // TODO store images that have no geo loc data to apply later
             }
 
-        return marker;
+            return marker;
+
+        } catch (Exception e) {
+            Log.e(TAG, "Failed getting location data for: " + imageUri);
+        }
+
+        return null;
     }
 
     private void addImageMarkerToGroup(ImageMarker marker) {
@@ -209,10 +196,8 @@ public class MainActivity extends AppCompatActivity {
 
                 group.setMarker(marker);
             }
-        } catch (Exception e) {}
-    }
+        } catch (Exception e) {
 
-    private void getGroupsFromDB() {
-        sqlHelper.getGroups();
+        }
     }
 }

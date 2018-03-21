@@ -11,7 +11,7 @@ import com.google.maps.android.clustering.view.DefaultClusterRenderer;
 import java.util.Set;
 
 /**
- * Created by admin on 1/21/18.
+ * Created by andrew dorsett on 1/21/18.
  */
 
 public class MarkerClusterRenderer extends DefaultClusterRenderer<MarkerGroup> {

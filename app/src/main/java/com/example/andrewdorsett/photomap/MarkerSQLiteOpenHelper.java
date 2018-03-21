@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Created by admin on 12/26/17.
+ * Created by andrew dorsett on 12/26/17.
  */
 
 public class MarkerSQLiteOpenHelper extends SQLiteOpenHelper {

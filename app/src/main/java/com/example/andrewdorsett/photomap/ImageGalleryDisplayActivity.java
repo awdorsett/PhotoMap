@@ -21,39 +21,35 @@ import android.widget.RelativeLayout;
 import java.io.IOException;
 import java.util.List;
 
+import static com.example.andrewdorsett.photomap.Constants.TITLE_KEY;
+import static com.example.andrewdorsett.photomap.Constants.URI_KEY;
+
 public class ImageGalleryDisplayActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_image_gallery_display);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+
+        Toolbar toolbar = findViewById(R.id.toolbar);
         LinearLayout container = findViewById(R.id.displayImageContainer);
 
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                finish();
-            }
-        });
+        FloatingActionButton fab = findViewById(R.id.fab);
+        fab.setOnClickListener(view -> finish());
 
         CollapsingToolbarLayout layout = findViewById(R.id.toolbar_layout);
 
-        // TODO: pass group title once groups are set up.
-        // TODO: set parameters as static references
-        if (getIntent().hasExtra("group_title")) {
-            // Nothing currently
-            layout.setTitle(getIntent().getStringExtra("group_title"));
+        if (getIntent().hasExtra(TITLE_KEY)) {
+            layout.setTitle(getIntent().getStringExtra(TITLE_KEY));
         } else {
             layout.setTitle("Photos");
         }
 
 
-        if (getIntent().hasExtra("uris")) {
-            List<Uri> uris = getIntent().getParcelableArrayListExtra("uris");
+        if (getIntent().hasExtra(URI_KEY)) {
+            List<Uri> uris = getIntent().getParcelableArrayListExtra(URI_KEY);
             DisplayMetrics metrics = getResources().getDisplayMetrics();
 
             for (Uri uri : uris) {

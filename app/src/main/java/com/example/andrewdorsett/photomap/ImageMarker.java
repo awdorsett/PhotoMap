@@ -10,7 +10,7 @@ import com.google.maps.android.clustering.ClusterItem;
 import java.util.Date;
 
 /**
- * Created by admin on 12/26/17.
+ * Created by andrew dorsett on 12/26/17.
  */
 
 public class ImageMarker implements Parcelable, ClusterItem {
