@@ -49,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
 
         Button imageButton = findViewById(R.id.imageButton);
         Button mapButton = findViewById(R.id.mapButton);
+        Button incompleteImageButton = findViewById(R.id.incompleteImageButton);
 //      sqlHelper.resetTables(); // FOR TESTING
         groups = sqlHelper.getGroups();
 
@@ -64,6 +65,7 @@ public class MainActivity extends AppCompatActivity {
         imageButton.setOnClickListener(view -> launchGallery(view));
 
         mapButton.setOnClickListener(view -> launchMaps(view, null));
+
 
         // TODO Remove after testing is done
         Button resetButton = findViewById(R.id.resetButton);
@@ -135,6 +137,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             sqlHelper.saveGroupToDB(groups);
+            // TODO is this needed?
         } else if (requestCode == OPEN_IMAGE_SELECT) {
             launchGallery(null);
         }
