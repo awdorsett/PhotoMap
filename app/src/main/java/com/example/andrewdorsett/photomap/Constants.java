@@ -12,11 +12,12 @@ public class Constants {
     // Attribute Keys
     public static final String TITLE_KEY = "groupTitle";
     public static final String URI_KEY = "uris";
-
+    public static final String INCOMPLETE_IMAGES_KEY = "incompleteImages";
 
     // Activity Codes
     // move to enum?
     public static final int OPEN_IMAGE_SELECT = 102;
     public static final int PICK_IMAGE = 101;
+    public static final int SELECT_GEO = 103;
 
 }

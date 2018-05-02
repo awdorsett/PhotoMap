@@ -25,8 +25,10 @@ import java.util.List;
 
 import static android.content.Intent.ACTION_OPEN_DOCUMENT;
 import static com.example.andrewdorsett.photomap.Constants.GROUPS_KEY;
+import static com.example.andrewdorsett.photomap.Constants.INCOMPLETE_IMAGES_KEY;
 import static com.example.andrewdorsett.photomap.Constants.OPEN_IMAGE_SELECT;
 import static com.example.andrewdorsett.photomap.Constants.PICK_IMAGE;
+import static com.example.andrewdorsett.photomap.Constants.SELECT_GEO;
 import static com.example.andrewdorsett.photomap.Constants.SELECT_GROUP_KEY;
 
 public class MainActivity extends AppCompatActivity {
@@ -36,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
     private Date latestDate = null;
     private Geocoder geocoder;
     private MarkerSQLiteOpenHelper sqlHelper;
+    private ArrayList<ImageMarker> incompleteMarkers = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,10 +97,25 @@ public class MainActivity extends AppCompatActivity {
         startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE);
     }
 
+    public void launchSelectGeo() {
+        Intent intent = new Intent();
+        intent.putParcelableArrayListExtra(INCOMPLETE_IMAGES_KEY, incompleteMarkers);
+        startActivityForResult(Intent.createChooser(intent, "Select Geo Location"), SELECT_GEO);
+    }
+
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
+        // TODO clean up this code, use switch statement?
+//        switch(resultCode){
+//            case OPEN_IMAGE_SELECT:
+//                break;
+//            case SELECT_GEO:
+//                break;
+//            case PICK_IMAGE:
+//                break;
+//        }
         if (requestCode == PICK_IMAGE && data != null) {
             if (data.getData() != null) {
                 ImageMarker marker = constructImageMarker(data.getData(), data);
@@ -132,10 +150,22 @@ public class MainActivity extends AppCompatActivity {
         getContentResolver().takePersistableUriPermission(imageUri, takeFlags);
 
         // Get geo location and date information
+        ImageMarker marker = new ImageMarker();
+        marker.setImageUri(imageUri);
+
+        addImageGeoData(marker);
+
+        if (!addImageGeoData(marker)) {
+            incompleteMarkers.add(marker);
+            return null;
+        }
+
+        return marker;
+    }
+
+    private boolean addImageGeoData(ImageMarker marker) {
         try {
-            ImageMarker marker = new ImageMarker();
-            marker.setImageUri(imageUri);
-            InputStream in = getContentResolver().openInputStream(imageUri);
+            InputStream in = getContentResolver().openInputStream(marker.getImageUri());
             Metadata metadata = ImageMetadataReader.readMetadata(in);
 
             // Set location
@@ -162,17 +192,12 @@ public class MainActivity extends AppCompatActivity {
                         latestDate = imageDate;
                     }
                 }
-            } else {
-                // TODO store images that have no geo loc data to apply later
             }
-
-            return marker;
-
         } catch (Exception e) {
-            Log.e(TAG, "Failed getting location data for: " + imageUri);
+                Log.e(TAG, "Failed getting location data for: " + marker.getImageUri());
         }
 
-        return null;
+        return marker.getPosition() != null;
     }
 
     private void addImageMarkerToGroup(ImageMarker marker) {
