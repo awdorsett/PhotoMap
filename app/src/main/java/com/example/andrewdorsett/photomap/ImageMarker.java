@@ -4,6 +4,7 @@ import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.drew.lang.annotations.NotNull;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.maps.android.clustering.ClusterItem;
 
@@ -78,6 +79,14 @@ public class ImageMarker implements Parcelable, ClusterItem {
         this.latLng = new LatLng(latitude, longitude);
     }
 
+    public void setLatLng(@NotNull LatLng newLatLong) {
+        this.latLng = newLatLong;
+    }
+
+    public boolean isLatLngSet() {
+        return latLng != null && (latLng.latitude != 0 && latLng.longitude != 0);
+    }
+
     public Date getOriginalDate() {
         return originalDate;
     }
@@ -121,8 +130,8 @@ public class ImageMarker implements Parcelable, ClusterItem {
         parcel.writeString(title);
         parcel.writeDouble(latLng.latitude);
         parcel.writeDouble(latLng.longitude);
-        parcel.writeLong(originalDate.getTime());
-        parcel.writeLong(addedDate.getTime());
+        parcel.writeLong(originalDate != null ? originalDate.getTime() : System.currentTimeMillis());
+        parcel.writeLong(addedDate != null ? addedDate.getTime() :  System.currentTimeMillis());
         parcel.writeString(imageUri.toString());
         parcel.writeInt(groupId);
     }
@@ -149,9 +158,7 @@ public class ImageMarker implements Parcelable, ClusterItem {
     @Override
     public boolean equals(Object second) {
         if (second instanceof ImageMarker) {
-            return this.id == ((ImageMarker) second).id
-                    && this.imageUri.equals(((ImageMarker) second).getImageUri())
-                    && this.latLng.equals(((ImageMarker) second).latLng);
+            return this.imageUri.equals(((ImageMarker) second).getImageUri());
         }
         return false;
     }

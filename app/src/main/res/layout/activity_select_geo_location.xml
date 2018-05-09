@@ -20,6 +20,17 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <include layout="@layout/content_select_geo_location" />
+    <include
+        android:id="@+id/include"
+        layout="@layout/content_select_geo_location" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/saveLocations"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        app:layout_anchor="@+id/include"
+        app:layout_anchorGravity="right|bottom"
+        app:srcCompat="@android:drawable/ic_menu_save" />
 
 </android.support.design.widget.CoordinatorLayout>

@@ -5,8 +5,9 @@ import android.content.Intent;
 import android.location.Address;
 import android.location.Geocoder;
 import android.net.Uri;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -24,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import static android.content.Intent.ACTION_OPEN_DOCUMENT;
+import static com.example.andrewdorsett.photomap.Constants.COMPLETE_IMAGE_KEY;
 import static com.example.andrewdorsett.photomap.Constants.GROUPS_KEY;
 import static com.example.andrewdorsett.photomap.Constants.INCOMPLETE_IMAGES_KEY;
 import static com.example.andrewdorsett.photomap.Constants.OPEN_IMAGE_SELECT;
@@ -39,7 +41,8 @@ public class MainActivity extends AppCompatActivity {
     private Geocoder geocoder;
     private MarkerSQLiteOpenHelper sqlHelper;
     private ArrayList<ImageMarker> incompleteMarkers = new ArrayList<>();
-
+    private FloatingActionButton incompleteImageButton;
+    ListView groupList;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,11 +52,12 @@ public class MainActivity extends AppCompatActivity {
 
         Button imageButton = findViewById(R.id.imageButton);
         Button mapButton = findViewById(R.id.mapButton);
-        Button incompleteImageButton = findViewById(R.id.incompleteImageButton);
-//      sqlHelper.resetTables(); // FOR TESTING
+        incompleteImageButton = findViewById(R.id.incompleteImageButton);
+        incompleteImageButton.setVisibility(View.GONE);
+        //sqlHelper.resetTables(); // FOR TESTING
         groups = sqlHelper.getGroups();
 
-        ListView groupList = findViewById(R.id.group_list);
+        groupList = findViewById(R.id.group_list);
         GroupListAdapter groupListAdapter = new GroupListAdapter(groupList.getContext(), groups);
         groupList.setAdapter(groupListAdapter);
         groupList.setOnItemClickListener((adapterView, view, pos, id) -> {
@@ -66,6 +70,9 @@ public class MainActivity extends AppCompatActivity {
 
         mapButton.setOnClickListener(view -> launchMaps(view, null));
 
+        incompleteImageButton.setOnClickListener(view -> {
+            launchSelectGeo();
+        });
 
         // TODO Remove after testing is done
         Button resetButton = findViewById(R.id.resetButton);
@@ -73,6 +80,8 @@ public class MainActivity extends AppCompatActivity {
             groups = new ArrayList<>();
             sqlHelper.resetTables();
         });
+
+
     }
 
     public void launchMaps(View view, MarkerGroup selectedGroup) {
@@ -100,8 +109,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void launchSelectGeo() {
-        Intent intent = new Intent();
-        intent.putParcelableArrayListExtra(INCOMPLETE_IMAGES_KEY, incompleteMarkers);
+        Bundle b = new Bundle();
+        b.putParcelableArrayList(INCOMPLETE_IMAGES_KEY, incompleteMarkers);
+        Intent intent = new Intent(this, SelectGeoLocation.class);
+        intent.putExtra("bundle", b);
         startActivityForResult(Intent.createChooser(intent, "Select Geo Location"), SELECT_GEO);
     }
 
@@ -137,11 +148,25 @@ public class MainActivity extends AppCompatActivity {
             }
 
             sqlHelper.saveGroupToDB(groups);
+            incompleteImageButton.setVisibility(incompleteMarkers.isEmpty() ? View.GONE : View.VISIBLE);
+
             // TODO is this needed?
         } else if (requestCode == OPEN_IMAGE_SELECT) {
             launchGallery(null);
-        }
+        } else if (requestCode == SELECT_GEO) {
+            if (data.getBundleExtra("bundle") != null) {
+                List<ImageMarker> completeImages = data.getBundleExtra("bundle").getParcelableArrayList(COMPLETE_IMAGE_KEY);
+                for (ImageMarker marker : completeImages) {
+                    addImageMarkerToGroup(marker);
+                    incompleteMarkers.remove(marker);
+                }
+                sqlHelper.saveGroupToDB(groups);
 
+                incompleteImageButton.setVisibility(incompleteMarkers.isEmpty() ? View.GONE : View.VISIBLE);
+
+                updateGroupList();
+            }
+        }
     }
 
     private ImageMarker constructImageMarker(Uri imageUri, Intent intent) {
@@ -155,15 +180,15 @@ public class MainActivity extends AppCompatActivity {
         // Get geo location and date information
         ImageMarker marker = new ImageMarker();
         marker.setImageUri(imageUri);
-
         addImageGeoData(marker);
 
-        if (!addImageGeoData(marker)) {
+        if (!marker.isLatLngSet()) {
             incompleteMarkers.add(marker);
-            return null;
+        } else {
+            return marker;
         }
 
-        return marker;
+        return null;
     }
 
     private boolean addImageGeoData(ImageMarker marker) {
@@ -200,7 +225,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.e(TAG, "Failed getting location data for: " + marker.getImageUri());
         }
 
-        return marker.getPosition() != null;
+        return marker.isLatLngSet();
     }
 
     private void addImageMarkerToGroup(ImageMarker marker) {
@@ -227,5 +252,12 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception e) {
 
         }
+    }
+
+    private void updateGroupList(){
+        groups = sqlHelper.getGroups();
+
+        GroupListAdapter groupListAdapter = new GroupListAdapter(groupList.getContext(), groups);
+        groupList.setAdapter(groupListAdapter);
     }
 }

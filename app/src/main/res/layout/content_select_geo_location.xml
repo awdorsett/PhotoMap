@@ -8,4 +8,11 @@
     tools:context="com.example.andrewdorsett.photomap.SelectGeoLocation"
     tools:showIn="@layout/activity_select_geo_location">
 
+    <ListView
+        android:id="@+id/image_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/mapButton"
+        android:layout_alignParentStart="true"></ListView>
+
 </android.support.constraint.ConstraintLayout>

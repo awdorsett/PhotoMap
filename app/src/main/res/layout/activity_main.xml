@@ -16,6 +16,7 @@
             android:layout_height="wrap_content"
             android:layout_above="@+id/mapButton"
             android:layout_alignParentStart="true"></ListView>
+
         <Button
             android:id="@+id/mapButton"
             android:layout_width="wrap_content"
@@ -47,15 +48,19 @@
             android:layout_alignTop="@+id/imageButton"
             android:layout_centerHorizontal="true"
             android:text="ResetDB" />
-    </RelativeLayout>
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/incompleteImageButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:clickable="true"
-        app:srcCompat="@android:drawable/ic_dialog_alert"
-        tools:layout_editor_absoluteX="328dp"
-        tools:layout_editor_absoluteY="16dp" />
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/incompleteImageButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:focusable="true"
+            app:srcCompat="@android:drawable/ic_dialog_alert"
+            tools:layout_editor_absoluteX="0dp"
+            tools:layout_editor_absoluteY="152dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:layout_margin="10dp"/>
+    </RelativeLayout>
 
 </android.support.constraint.ConstraintLayout>
