@@ -55,16 +55,9 @@ public class MainActivity extends AppCompatActivity {
         incompleteImageButton = findViewById(R.id.incompleteImageButton);
         incompleteImageButton.setVisibility(View.GONE);
         //sqlHelper.resetTables(); // FOR TESTING
-        groups = sqlHelper.getGroups();
 
         groupList = findViewById(R.id.group_list);
-        GroupListAdapter groupListAdapter = new GroupListAdapter(groupList.getContext(), groups);
-        groupList.setAdapter(groupListAdapter);
-        groupList.setOnItemClickListener((adapterView, view, pos, id) -> {
-            MarkerGroup group = groups.get(pos);
-            launchMaps(adapterView, group);
-
-        });
+        updateGroupList();
 
         imageButton.setOnClickListener(view -> launchGallery(view));
 
@@ -148,6 +141,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             sqlHelper.saveGroupToDB(groups);
+            updateGroupList();
             incompleteImageButton.setVisibility(incompleteMarkers.isEmpty() ? View.GONE : View.VISIBLE);
 
             // TODO is this needed?
@@ -213,12 +207,15 @@ public class MainActivity extends AppCompatActivity {
                     marker.setTitle(imageDirectory.getName());
 
                     Date imageDate = imageDirectory.getDateOriginal();
-                    marker.setOriginalDate(imageDate);
+                    marker.setOriginalDate(imageDate != null ? imageDate : new Date());
                     marker.setAddedDate(new Date());
 
                     if (latestDate == null || imageDate.getTime() > latestDate.getTime()) {
                         latestDate = imageDate;
                     }
+                } else {
+                    marker.setOriginalDate(new Date());
+                    marker.setAddedDate(new Date());
                 }
             }
         } catch (Exception e) {
@@ -255,9 +252,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateGroupList(){
+        groupMap.clear();
         groups = sqlHelper.getGroups();
-
+        for (MarkerGroup group : groups) {
+            if (groupMap.containsKey(group.getKey())) {
+                // TODO - This should throw an error since you should not have 2 localities
+            } else {
+                groupMap.put(group.getKey(), group);
+            }
+        }
         GroupListAdapter groupListAdapter = new GroupListAdapter(groupList.getContext(), groups);
         groupList.setAdapter(groupListAdapter);
+        groupList.setOnItemClickListener((adapterView, view, pos, id) -> {
+            MarkerGroup group = groups.get(pos);
+            launchMaps(adapterView, group);
+        });
     }
 }
