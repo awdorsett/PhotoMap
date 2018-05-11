@@ -29,8 +29,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:clickable="true"
+        android:focusable="true"
         app:layout_anchor="@+id/include"
         app:layout_anchorGravity="right|bottom"
+        android:layout_margin="@dimen/button_dimensions"
         app:srcCompat="@android:drawable/ic_menu_save" />
 
 </android.support.design.widget.CoordinatorLayout>

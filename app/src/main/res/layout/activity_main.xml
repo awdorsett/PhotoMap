@@ -14,53 +14,57 @@
             android:id="@+id/group_list"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_above="@+id/mapButton"
+            android:layout_above="@+id/buttonContainer"
+            android:layout_alignParentTop="true"
             android:layout_alignParentStart="true"></ListView>
 
-        <Button
-            android:id="@+id/mapButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
+        <RelativeLayout
+            android:id="@+id/buttonContainer"
             android:layout_alignParentStart="true"
-            android:layout_marginBottom="26dp"
-            android:layout_marginStart="27dp"
-            android:text="Map"
-            tools:layout_editor_absoluteX="16dp"
-            tools:layout_editor_absoluteY="168dp" />
+            android:layout_alignParentBottom="true"
+            android:layout_width="match_parent"
 
-        <Button
-            android:id="@+id/imageButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignBaseline="@+id/mapButton"
-            android:layout_alignBottom="@+id/mapButton"
-            android:layout_alignParentEnd="true"
-            android:layout_marginEnd="34dp"
-            android:text="Image"
-            tools:layout_editor_absoluteX="278dp"
-            tools:layout_editor_absoluteY="445dp" />
+            android:layout_height="wrap_content">
 
-        <Button
-            android:id="@+id/resetButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignTop="@+id/imageButton"
-            android:layout_centerHorizontal="true"
-            android:text="ResetDB" />
+            <Button
+                android:id="@+id/resetButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@+id/imageButton"
+                android:layout_centerHorizontal="true"
+                android:text="@string/reset_button" />
+
+            <Button
+                android:id="@+id/imageButton"
+                android:layout_marginEnd="@dimen/button_dimensions"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBaseline="@+id/mapButton"
+                android:layout_alignParentEnd="true"
+                android:theme="@style/PrimaryButton"
+                android:text="@string/image_button" />
+
+            <Button
+                android:id="@+id/mapButton"
+                android:layout_marginStart="@dimen/button_dimensions"
+                android:layout_alignParentStart="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/map_button"
+                android:theme="@style/PrimaryButton" />
+        </RelativeLayout>
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/incompleteImageButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentTop="true"
+            android:layout_margin="@dimen/button_dimensions"
             android:clickable="true"
             android:focusable="true"
-            app:srcCompat="@android:drawable/ic_dialog_alert"
-            tools:layout_editor_absoluteX="0dp"
-            tools:layout_editor_absoluteY="152dp"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentEnd="true"
-            android:layout_margin="10dp"/>
+            app:backgroundTint="@color/colorPrimaryDark"
+            app:srcCompat="@android:drawable/ic_dialog_alert" />
     </RelativeLayout>
 
 </android.support.constraint.ConstraintLayout>

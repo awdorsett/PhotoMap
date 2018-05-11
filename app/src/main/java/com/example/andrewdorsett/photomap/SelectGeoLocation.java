@@ -44,8 +44,8 @@ public class SelectGeoLocation extends AppCompatActivity {
             incompleteImages = bundle.getParcelableArrayList(INCOMPLETE_IMAGES_KEY);
             ListView imageList = findViewById(R.id.image_list);
 
-            ImageListAdapter groupListAdapter = new ImageListAdapter(imageList.getContext(), incompleteImages);
-            imageList.setAdapter(groupListAdapter);
+            ImageListAdapter imageListAdapter = new ImageListAdapter(imageList.getContext(), incompleteImages);
+            imageList.setAdapter(imageListAdapter);
             imageList.setOnItemClickListener((adapterView, view, pos, id) -> {
                 selectedImage = (ImageMarker) imageList.getItemAtPosition(pos);
                 PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();

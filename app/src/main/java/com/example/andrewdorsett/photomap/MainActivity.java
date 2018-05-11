@@ -163,6 +163,8 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
+    // TODO move into service
     private ImageMarker constructImageMarker(Uri imageUri, Intent intent) {
 
         // Persist read permission on image
@@ -185,6 +187,7 @@ public class MainActivity extends AppCompatActivity {
         return null;
     }
 
+    // TODO move into service
     private boolean addImageGeoData(ImageMarker marker) {
         try {
             InputStream in = getContentResolver().openInputStream(marker.getImageUri());

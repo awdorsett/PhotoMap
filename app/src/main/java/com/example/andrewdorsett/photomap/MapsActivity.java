@@ -2,11 +2,9 @@ package com.example.andrewdorsett.photomap;
 
 import android.content.Intent;
 import android.net.Uri;
-import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.Button;
-import android.widget.ListView;
+import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.FragmentActivity;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -15,11 +13,9 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.maps.android.clustering.Cluster;
 import com.google.maps.android.clustering.ClusterManager;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,7 +56,7 @@ public class MapsActivity extends FragmentActivity implements
             selectedGroup = intent.getParcelableExtra(SELECT_GROUP_KEY);
         }
 
-        Button addImage = findViewById(R.id.addImageButton);
+        FloatingActionButton addImage = findViewById(R.id.addImageButton);
         addImage.setOnClickListener(view -> {
             setResult(OPEN_IMAGE_SELECT);
             finish();

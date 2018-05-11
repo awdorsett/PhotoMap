@@ -98,4 +98,9 @@
     </string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_select_geo_location">SelectGeoLocation</string>
+
+    <!--Button Texts-->
+    <string name="image_button">Image</string>
+    <string name="map_button">Map</string>
+    <string name="reset_button">Reset DB</string>
 </resources>
