@@ -15,4 +15,6 @@
     <string name="image_button">Image</string>
     <string name="map_button">Map</string>
     <string name="reset_button">Reset DB</string>
+    <string name="save_button">Save</string>
+    <string name="cancel_button">Cancel</string>
 </resources>

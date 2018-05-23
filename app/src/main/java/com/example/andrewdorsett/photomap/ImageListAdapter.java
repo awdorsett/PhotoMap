@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -22,6 +23,7 @@ public class ImageListAdapter extends BaseAdapter {
     private Context context;
     private Context itemContext;
     private HashMap<Uri, Bitmap> thumbnailMap = new HashMap<>();
+    private boolean isCheckboxVisible = false;
 
     public ImageListAdapter(Context context, List<ImageMarker> images) {
         this.context = context;
@@ -62,12 +64,14 @@ public class ImageListAdapter extends BaseAdapter {
             viewHolder.groupTitle = view.findViewById(R.id.group_title);
             viewHolder.groupInfo = view.findViewById(R.id.group_info);
             viewHolder.groupImage = view.findViewById(R.id.group_image);
-
+            viewHolder.selected = view.findViewById(R.id.select_checkbox);
+            viewHolder.selected.setVisibility(isCheckboxVisible ? View.VISIBLE : View.GONE);
             result = view;
 
             view.setTag(viewHolder);
         } else {
             viewHolder = (GroupViewHolder) view.getTag();
+            viewHolder.selected.setVisibility(isCheckboxVisible ? View.VISIBLE : View.GONE);
             result = view;
         }
 
@@ -80,11 +84,19 @@ public class ImageListAdapter extends BaseAdapter {
         return view;
     }
 
+    public void setCheckboxVisible(boolean value) {
+        if (isCheckboxVisible != value) {
+            isCheckboxVisible = value;
+            notifyDataSetChanged();
+        }
+    }
+
     private static class GroupViewHolder {
 
         TextView groupTitle;
         TextView groupInfo;
         ImageView groupImage;
+        CheckBox selected;
     }
 
     private Bitmap getThumbnail(Uri imageUri) {

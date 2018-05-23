@@ -6,13 +6,21 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
+import android.widget.Spinner;
 
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlacePicker;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.example.andrewdorsett.photomap.Constants.COMPLETE_IMAGE_KEY;
 import static com.example.andrewdorsett.photomap.Constants.INCOMPLETE_IMAGES_KEY;
@@ -22,6 +30,13 @@ public class SelectGeoLocation extends AppCompatActivity {
     private List<ImageMarker> incompleteImages;
     private ArrayList<ImageMarker> completeImages = new ArrayList<>();
     private ImageMarker selectedImage = null;
+    private MarkerGroup selectedGroup = null;
+    private RelativeLayout groupSelectLayout = null;
+    private MarkerSQLiteOpenHelper sqlHelper = new MarkerSQLiteOpenHelper(this);
+    private Spinner groupSelectSpinner = null;
+    private     ListView imageList;
+    // TODO put this into its own adapter
+    private Map<String, MarkerGroup> groupMap = new HashMap<>();
 
     /**
      * Display list of images
@@ -36,13 +51,26 @@ public class SelectGeoLocation extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         FloatingActionButton saveButton = findViewById(R.id.saveLocations);
-
+        saveButton.setVisibility(completeImages.isEmpty() ? View.GONE : View.VISIBLE);
+        groupSelectLayout = findViewById(R.id.group_select);
+        groupSelectLayout.setVisibility(View.GONE);
+        groupSelectSpinner = findViewById(R.id.group_spinner);
         Intent intent = getIntent();
         if (intent.hasExtra("bundle")) {
             Bundle bundle = intent.getBundleExtra("bundle");
+            List<MarkerGroup> groups = sqlHelper.getGroups();
+            List<String> groupTitles = groups.stream().map(MarkerGroup::getTitle).collect(Collectors.toList());
+            groups.forEach((group) -> {
+                groupMap.put(group.getTitle(), group);
+            });
+
+            ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, groupTitles);
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            groupSelectSpinner.setAdapter(adapter);
+            Button groupSelectCancel = findViewById(R.id.cancel_selection);
 
             incompleteImages = bundle.getParcelableArrayList(INCOMPLETE_IMAGES_KEY);
-            ListView imageList = findViewById(R.id.image_list);
+            imageList = findViewById(R.id.image_list);
 
             ImageListAdapter imageListAdapter = new ImageListAdapter(imageList.getContext(), incompleteImages);
             imageList.setAdapter(imageListAdapter);
@@ -54,6 +82,19 @@ public class SelectGeoLocation extends AppCompatActivity {
                 } catch (Exception e) {
                     Log.e("SelectGeoLoc", "onCreate: " + e.getMessage() );
                 }
+            });
+
+            imageList.setOnItemLongClickListener((adapterView, view, pos, id) -> {
+                imageListAdapter.setCheckboxVisible(true);
+                imageListAdapter.notifyDataSetChanged();
+                groupSelectLayout.setVisibility(View.VISIBLE);
+                String selection = (String) groupSelectSpinner.getSelectedItem();
+                selectedGroup = groupMap.get(selection);
+                return true;
+            });
+            groupSelectCancel.setOnClickListener((view) -> {
+                selectedGroup = null;
+                imageListAdapter.setCheckboxVisible(false);
             });
         } else {
             // TODO error message
@@ -67,13 +108,18 @@ public class SelectGeoLocation extends AppCompatActivity {
             setResult(SELECT_GEO, data);
             finish();
         });
+
+
     }
 
+    // TODO clean up
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
             Place place = PlacePicker.getPlace(this, data);
             selectedImage.setLatLng(place.getLatLng());
             completeImages.add(selectedImage);
             incompleteImages.remove(selectedImage);
+            FloatingActionButton saveButton = findViewById(R.id.saveLocations);
+            saveButton.setVisibility(View.VISIBLE);
     }
 }
