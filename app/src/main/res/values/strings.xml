@@ -17,4 +17,5 @@
     <string name="reset_button">Reset DB</string>
     <string name="save_button">Save</string>
     <string name="cancel_button">Cancel</string>
+    <string name="done_button">Done</string>
 </resources>

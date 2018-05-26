@@ -6,12 +6,10 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 
@@ -255,7 +253,7 @@ public class MainActivity extends AppCompatActivity {
                     groups.add(group);
                 }
 
-                group.setMarker(marker);
+                group.addMarker(marker);
             }
         } catch (Exception e) {
 

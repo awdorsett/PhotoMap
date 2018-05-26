@@ -19,9 +19,9 @@ import java.util.List;
  */
 
 public class ImageListAdapter extends BaseAdapter {
-    private List<ImageMarker> images;
+    protected List<ImageMarker> images;
     private Context context;
-    private Context itemContext;
+    protected Context itemContext;
     private HashMap<Uri, Bitmap> thumbnailMap = new HashMap<>();
     private boolean isCheckboxVisible = false;
 
@@ -56,7 +56,6 @@ public class ImageListAdapter extends BaseAdapter {
         final View result;
 
         if (view == null) {
-
             viewHolder = new GroupViewHolder();
             LayoutInflater inflater = LayoutInflater.from(context);
             itemContext = inflater.getContext();
@@ -91,6 +90,7 @@ public class ImageListAdapter extends BaseAdapter {
         }
     }
 
+
     private static class GroupViewHolder {
 
         TextView groupTitle;
@@ -99,7 +99,7 @@ public class ImageListAdapter extends BaseAdapter {
         CheckBox selected;
     }
 
-    private Bitmap getThumbnail(Uri imageUri) {
+    protected Bitmap getThumbnail(Uri imageUri) {
 
         if (!thumbnailMap.containsKey(imageUri)) {;
             int height = (int) context.getResources().getDimension(R.dimen.group_list_max_height);

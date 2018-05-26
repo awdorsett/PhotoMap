@@ -21,7 +21,7 @@ public class ImageMarker implements Parcelable, ClusterItem {
     private LatLng latLng;
     private Date originalDate;
     private Date addedDate;
-    private int groupId;
+    private long groupId;
     private Uri imageUri;
 
     public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
@@ -38,7 +38,7 @@ public class ImageMarker implements Parcelable, ClusterItem {
         this(-1, null, 0, 0, null, null, null, DEFAULT_GROUP_ID);
     }
 
-    public ImageMarker(long id, String title, double latitude, double longitude, Date originalDate, Date addedDate, Uri imageUri, int groupId) {
+    public ImageMarker(long id, String title, double latitude, double longitude, Date originalDate, Date addedDate, Uri imageUri, long groupId) {
         this.id = id;
         this.title = title;
         latLng = new LatLng(latitude, longitude);
@@ -103,11 +103,11 @@ public class ImageMarker implements Parcelable, ClusterItem {
         this.addedDate = addedDate;
     }
 
-    public int getGroupId() {
+    public long getGroupId() {
         return groupId;
     }
 
-    public void setGroupId(int groupId) {
+    public void setGroupId(long groupId) {
         this.groupId = groupId;
     }
 
@@ -133,7 +133,7 @@ public class ImageMarker implements Parcelable, ClusterItem {
         parcel.writeLong(originalDate != null ? originalDate.getTime() : System.currentTimeMillis());
         parcel.writeLong(addedDate != null ? addedDate.getTime() :  System.currentTimeMillis());
         parcel.writeString(imageUri.toString());
-        parcel.writeInt(groupId);
+        parcel.writeLong(groupId);
     }
 
     public ImageMarker(Parcel in) {
@@ -143,7 +143,7 @@ public class ImageMarker implements Parcelable, ClusterItem {
         this.originalDate = new Date(in.readLong());
         this.addedDate = new Date(in.readLong());
         this.imageUri = Uri.parse(in.readString());
-        this.groupId = in.readInt();
+        this.groupId = in.readLong();
     }
 
     @Override

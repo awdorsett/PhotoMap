@@ -58,9 +58,14 @@ public class MarkerGroup implements Parcelable, ClusterItem {
         this.markers = markers;
     }
 
-    public void setMarker(ImageMarker marker) {
+    public void addMarker(ImageMarker marker) {
         markers.add(marker);
     }
+
+    public void addMarkers(List<ImageMarker> markers) {
+        markers.addAll(markers);
+    }
+
 
     public void clearMarkers() {
         markers = new ArrayList<>();

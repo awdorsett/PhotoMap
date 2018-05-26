@@ -15,10 +15,12 @@ import java.util.List;
 
 public class GeoImageListAdapter extends ImageListAdapter {
     private HashMap<Uri, Place> placesMap;
+    private Context context;
 
     public GeoImageListAdapter(Context context, List<ImageMarker> images, HashMap<Uri, Place> placesMap) {
         super(context, images);
         this.placesMap = placesMap;
+        this.context = context;
     }
 
     // TODO DRY out code and make inheritance proper

@@ -3,13 +3,13 @@ package com.example.andrewdorsett.photomap;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
@@ -30,12 +30,15 @@ import static com.example.andrewdorsett.photomap.Constants.SELECT_GEO;
 public class SelectGeoLocation extends AppCompatActivity {
     private List<ImageMarker> incompleteImages;
     private ArrayList<ImageMarker> completeImages = new ArrayList<>();
+    private ArrayList<MarkerGroup> updatedGroup = new ArrayList<>();
     private ImageMarker selectedImage = null;
     private MarkerGroup selectedGroup = null;
-    private RelativeLayout groupSelectLayout = null;
+    private RelativeLayout buttonLayout = null;
     private MarkerSQLiteOpenHelper sqlHelper = new MarkerSQLiteOpenHelper(this);
     private Spinner groupSelectSpinner = null;
-    private     ListView imageList;
+    private ListView imageList;
+    private HashMap<Uri, Place> placesMap = new HashMap<>();
+
     // TODO put this into its own adapter
     private Map<String, MarkerGroup> groupMap = new HashMap<>();
 
@@ -51,12 +54,16 @@ public class SelectGeoLocation extends AppCompatActivity {
         setContentView(R.layout.activity_select_geo_location);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        FloatingActionButton saveButton = findViewById(R.id.saveLocations);
+        Button saveButton = findViewById(R.id.save_selection);
+        Button doneButton = findViewById(R.id.done_button);
+
         saveButton.setVisibility(completeImages.isEmpty() ? View.GONE : View.VISIBLE);
-        groupSelectLayout = findViewById(R.id.group_select);
-        groupSelectLayout.setVisibility(View.GONE);
+
+        buttonLayout = findViewById(R.id.group_select);
+        buttonLayout.setVisibility(View.GONE);
         groupSelectSpinner = findViewById(R.id.group_spinner);
         Intent intent = getIntent();
+
         if (intent.hasExtra("bundle")) {
             Bundle bundle = intent.getBundleExtra("bundle");
             List<MarkerGroup> groups = sqlHelper.getGroups();
@@ -68,7 +75,7 @@ public class SelectGeoLocation extends AppCompatActivity {
             ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, groupTitles);
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             groupSelectSpinner.setAdapter(adapter);
-            Button groupSelectCancel = findViewById(R.id.cancel_selection);
+            Button cancelButton = findViewById(R.id.cancel_selection);
 
             incompleteImages = bundle.getParcelableArrayList(INCOMPLETE_IMAGES_KEY);
             imageList = findViewById(R.id.image_list);
@@ -86,16 +93,53 @@ public class SelectGeoLocation extends AppCompatActivity {
             });
 
             imageList.setOnItemLongClickListener((adapterView, view, pos, id) -> {
+                buttonLayout.setVisibility(View.VISIBLE);
+                RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) cancelButton.getLayoutParams();
+                params.addRule(RelativeLayout.START_OF, R.id.done_button);
                 imageListAdapter.setCheckboxVisible(true);
                 imageListAdapter.notifyDataSetChanged();
-                groupSelectLayout.setVisibility(View.VISIBLE);
+                groupSelectSpinner.setVisibility(View.VISIBLE);
                 String selection = (String) groupSelectSpinner.getSelectedItem();
                 selectedGroup = groupMap.get(selection);
+                doneButton.setVisibility(View.VISIBLE);
+                saveButton.setVisibility(View.GONE);
+                cancelButton.setVisibility(View.VISIBLE);
+
                 return true;
             });
-            groupSelectCancel.setOnClickListener((view) -> {
+
+            cancelButton.setOnClickListener((view) -> {
                 selectedGroup = null;
                 imageListAdapter.setCheckboxVisible(false);
+                imageListAdapter.notifyDataSetChanged();
+                groupSelectSpinner.setVisibility(View.GONE);
+                if (completeImages.isEmpty()) {
+                    buttonLayout.setVisibility(View.GONE);
+                }
+            });
+
+            doneButton.setOnClickListener((view) -> {
+                doneButton.setVisibility(View.GONE);
+                saveButton.setVisibility(View.VISIBLE);
+                cancelButton.setVisibility(View.GONE);
+                String selection = (String) groupSelectSpinner.getSelectedItem();
+                MarkerGroup group = groupMap.get(selection);
+                List<ImageMarker> markers = getSelectedImages();
+
+                for (ImageMarker marker : markers) {
+                    marker.setGroupId(group.getId());
+                    marker.setLatLng(group.getPosition());
+                }
+
+                group.addMarkers(markers);
+                updatedGroup.add(group);
+
+                groupSelectSpinner.setVisibility(View.GONE);
+
+                completeImages.addAll(markers);
+                updateImageList();
+                RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) cancelButton.getLayoutParams();
+                params.addRule(RelativeLayout.START_OF, R.id.save_selection);
             });
         } else {
             // TODO error message
@@ -116,8 +160,10 @@ public class SelectGeoLocation extends AppCompatActivity {
         if (data != null) {
             Place place = PlacePicker.getPlace(this, data);
             placesMap.put(selectedImage.getImageUri(), place);
+            buttonLayout.setVisibility(View.VISIBLE);
             selectedImage.setLatLng(place.getLatLng());
             completeImages.add(selectedImage);
+            selectedImage = null;
             updateImageList();
         } else {
             selectedImage = null;
@@ -125,7 +171,6 @@ public class SelectGeoLocation extends AppCompatActivity {
     }
 
     private void updateImageList() {
-        saveButton.setVisibility(completeImages.size() > 0 ? View.VISIBLE : View.INVISIBLE);
         ImageListAdapter imageListAdapter = new GeoImageListAdapter(imageList.getContext(), incompleteImages, placesMap);
         imageList.setAdapter(imageListAdapter);
         imageList.setOnItemClickListener((adapterView, view, pos, id) -> {
@@ -138,4 +183,19 @@ public class SelectGeoLocation extends AppCompatActivity {
             }
         });
     }
+
+    private List<ImageMarker> getSelectedImages() {
+        List<ImageMarker> selectedImages = new ArrayList<>();
+        for(int i = 0; i < imageList.getChildCount(); i++) {
+            View imageView = imageList.getChildAt(i);
+            CheckBox checkBox = imageView.findViewById(R.id.select_checkbox);
+            if (checkBox.isChecked()) {
+                selectedImages.add((ImageMarker) imageList.getAdapter().getItem(i));
+            }
+        }
+
+        return selectedImages;
+    }
+
+    
 }

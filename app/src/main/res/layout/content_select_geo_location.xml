@@ -34,6 +34,12 @@
                 android:layout_margin="10dp"
                 android:layout_centerInParent="true"
                 />
+            <Button
+                android:id="@+id/done_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/done_button"
+                android:layout_alignParentEnd="true"/>
 
             <Button
                 android:id="@+id/save_selection"
@@ -47,7 +53,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/cancel_button"
-                android:layout_toLeftOf="@id/save_selection"/>
+                android:layout_toStartOf="@id/save_selection" />
         </RelativeLayout>
     </RelativeLayout>
 
