@@ -93,6 +93,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void launchGallery(View view) {
+        incompleteMarkers.clear();
         Intent intent = new Intent();
         intent.setType("image/*");
         intent.setAction(Intent.ACTION_OPEN_DOCUMENT);
@@ -148,7 +149,7 @@ public class MainActivity extends AppCompatActivity {
         } else if (requestCode == OPEN_IMAGE_SELECT) {
             launchGallery(null);
         } else if (requestCode == SELECT_GEO) {
-            if (data.getBundleExtra("bundle") != null) {
+            if (data != null && data.getBundleExtra("bundle") != null) {
                 List<ImageMarker> completeImages = data.getBundleExtra("bundle").getParcelableArrayList(COMPLETE_IMAGE_KEY);
                 for (ImageMarker marker : completeImages) {
                     addImageMarkerToGroup(marker);

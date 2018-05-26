@@ -18,10 +18,10 @@ import java.util.List;
  */
 
 public class ImageListAdapter extends BaseAdapter {
-    private List<ImageMarker> images;
-    private Context context;
-    private Context itemContext;
-    private HashMap<Uri, Bitmap> thumbnailMap = new HashMap<>();
+    protected List<ImageMarker> images;
+    protected Context context;
+    protected Context itemContext;
+    protected HashMap<Uri, Bitmap> thumbnailMap = new HashMap<>();
 
     public ImageListAdapter(Context context, List<ImageMarker> images) {
         this.context = context;
@@ -80,14 +80,8 @@ public class ImageListAdapter extends BaseAdapter {
         return view;
     }
 
-    private static class GroupViewHolder {
 
-        TextView groupTitle;
-        TextView groupInfo;
-        ImageView groupImage;
-    }
-
-    private Bitmap getThumbnail(Uri imageUri) {
+    protected Bitmap getThumbnail(Uri imageUri) {
 
         if (!thumbnailMap.containsKey(imageUri)) {;
             int height = (int) context.getResources().getDimension(R.dimen.group_list_max_height);
@@ -95,5 +89,12 @@ public class ImageListAdapter extends BaseAdapter {
         }
 
         return thumbnailMap.get(imageUri);
+    }
+
+
+    protected static class GroupViewHolder {
+        protected TextView groupTitle;
+        protected TextView groupInfo;
+        protected ImageView groupImage;
     }
 }
