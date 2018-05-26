@@ -22,7 +22,9 @@
 
     <include
         android:id="@+id/include"
+
         layout="@layout/content_select_geo_location" />
+
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/saveLocations"

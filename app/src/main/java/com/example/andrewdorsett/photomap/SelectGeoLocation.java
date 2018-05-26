@@ -8,7 +8,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
+import android.widget.Spinner;
 
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlacePicker;
@@ -16,6 +20,8 @@ import com.google.android.gms.location.places.ui.PlacePicker;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.example.andrewdorsett.photomap.Constants.COMPLETE_IMAGE_KEY;
 import static com.example.andrewdorsett.photomap.Constants.INCOMPLETE_IMAGES_KEY;
@@ -25,9 +31,14 @@ public class SelectGeoLocation extends AppCompatActivity {
     private List<ImageMarker> incompleteImages;
     private ArrayList<ImageMarker> completeImages = new ArrayList<>();
     private ImageMarker selectedImage = null;
-    private HashMap<Uri, Place> placesMap = new HashMap<>();
-    private ListView imageList;
-    private FloatingActionButton saveButton;
+    private MarkerGroup selectedGroup = null;
+    private RelativeLayout groupSelectLayout = null;
+    private MarkerSQLiteOpenHelper sqlHelper = new MarkerSQLiteOpenHelper(this);
+    private Spinner groupSelectSpinner = null;
+    private     ListView imageList;
+    // TODO put this into its own adapter
+    private Map<String, MarkerGroup> groupMap = new HashMap<>();
+
     /**
      * Display list of images
      * On click launch map for location
@@ -40,15 +51,52 @@ public class SelectGeoLocation extends AppCompatActivity {
         setContentView(R.layout.activity_select_geo_location);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        saveButton = findViewById(R.id.saveLocations);
-
+        FloatingActionButton saveButton = findViewById(R.id.saveLocations);
+        saveButton.setVisibility(completeImages.isEmpty() ? View.GONE : View.VISIBLE);
+        groupSelectLayout = findViewById(R.id.group_select);
+        groupSelectLayout.setVisibility(View.GONE);
+        groupSelectSpinner = findViewById(R.id.group_spinner);
         Intent intent = getIntent();
         if (intent.hasExtra("bundle")) {
             Bundle bundle = intent.getBundleExtra("bundle");
+            List<MarkerGroup> groups = sqlHelper.getGroups();
+            List<String> groupTitles = groups.stream().map(MarkerGroup::getTitle).collect(Collectors.toList());
+            groups.forEach((group) -> {
+                groupMap.put(group.getTitle(), group);
+            });
+
+            ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, groupTitles);
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            groupSelectSpinner.setAdapter(adapter);
+            Button groupSelectCancel = findViewById(R.id.cancel_selection);
 
             incompleteImages = bundle.getParcelableArrayList(INCOMPLETE_IMAGES_KEY);
             imageList = findViewById(R.id.image_list);
-            updateImageList();
+
+            ImageListAdapter imageListAdapter = new ImageListAdapter(imageList.getContext(), incompleteImages);
+            imageList.setAdapter(imageListAdapter);
+            imageList.setOnItemClickListener((adapterView, view, pos, id) -> {
+                selectedImage = (ImageMarker) imageList.getItemAtPosition(pos);
+                PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
+                try {
+                    startActivityForResult(builder.build(this), 1);
+                } catch (Exception e) {
+                    Log.e("SelectGeoLoc", "onCreate: " + e.getMessage() );
+                }
+            });
+
+            imageList.setOnItemLongClickListener((adapterView, view, pos, id) -> {
+                imageListAdapter.setCheckboxVisible(true);
+                imageListAdapter.notifyDataSetChanged();
+                groupSelectLayout.setVisibility(View.VISIBLE);
+                String selection = (String) groupSelectSpinner.getSelectedItem();
+                selectedGroup = groupMap.get(selection);
+                return true;
+            });
+            groupSelectCancel.setOnClickListener((view) -> {
+                selectedGroup = null;
+                imageListAdapter.setCheckboxVisible(false);
+            });
         } else {
             // TODO error message
         }

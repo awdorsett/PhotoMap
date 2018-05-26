@@ -7,7 +7,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -18,27 +17,26 @@ import java.util.List;
  * Created by Andrew Dorsett on 2/18/18.
  */
 
-public class ImageListAdapter extends BaseAdapter {
-    private List<ImageMarker> images;
+public class NotificationListAdapter extends BaseAdapter {
+    private List<MarkerGroup> groups;
     private Context context;
     private Context itemContext;
-    private HashMap<Uri, Bitmap> thumbnailMap = new HashMap<>();
-    private boolean isCheckboxVisible = false;
+    private HashMap<String, Bitmap> thumbnailMap = new HashMap<>();
 
-    public ImageListAdapter(Context context, List<ImageMarker> images) {
+    public NotificationListAdapter(Context context, List<MarkerGroup> groups) {
         this.context = context;
-        this.images = images;
+        this.groups = groups;
     }
 
     @Override
     public int getCount() {
-        return images.size();
+        return groups.size();
     }
 
     @Override
     public Object getItem(int i) {
-        if (i < images.size()) {
-            return images.get(i);
+        if (i < groups.size()) {
+            return groups.get(i);
         }
 
         return null;
@@ -64,31 +62,23 @@ public class ImageListAdapter extends BaseAdapter {
             viewHolder.groupTitle = view.findViewById(R.id.group_title);
             viewHolder.groupInfo = view.findViewById(R.id.group_info);
             viewHolder.groupImage = view.findViewById(R.id.group_image);
-            viewHolder.selected = view.findViewById(R.id.select_checkbox);
-            viewHolder.selected.setVisibility(isCheckboxVisible ? View.VISIBLE : View.GONE);
+
             result = view;
 
             view.setTag(viewHolder);
         } else {
             viewHolder = (GroupViewHolder) view.getTag();
-            viewHolder.selected.setVisibility(isCheckboxVisible ? View.VISIBLE : View.GONE);
             result = view;
         }
 
-        ImageMarker image = images.get(pos);
-        viewHolder.groupTitle.setText(image.getTitle());
-        if (image.getImageUri() != null) {
-            viewHolder.groupImage.setImageBitmap(getThumbnail(image.getImageUri()));
+        MarkerGroup group = groups.get(pos);
+        viewHolder.groupTitle.setText(group.getTitle());
+        viewHolder.groupInfo.setText("Image Count: " + group.getMarkers().size());
+        if (!group.getMarkers().isEmpty()) {
+            viewHolder.groupImage.setImageBitmap(getThumbnail(group));
         }
 
         return view;
-    }
-
-    public void setCheckboxVisible(boolean value) {
-        if (isCheckboxVisible != value) {
-            isCheckboxVisible = value;
-            notifyDataSetChanged();
-        }
     }
 
     private static class GroupViewHolder {
@@ -96,16 +86,16 @@ public class ImageListAdapter extends BaseAdapter {
         TextView groupTitle;
         TextView groupInfo;
         ImageView groupImage;
-        CheckBox selected;
     }
 
-    private Bitmap getThumbnail(Uri imageUri) {
+    private Bitmap getThumbnail(MarkerGroup group) {
 
-        if (!thumbnailMap.containsKey(imageUri)) {;
+        if (!thumbnailMap.containsKey(group.getTitle())) {
+            Uri uri = group.getMarkers().get(0).getImageUri();
             int height = (int) context.getResources().getDimension(R.dimen.group_list_max_height);
-            thumbnailMap.put(imageUri,ImageResizeUtil.getScaledBitMap(itemContext.getContentResolver(), imageUri, height, height));
+            thumbnailMap.put(group.getTitle(),ImageResizeUtil.getScaledBitMap(itemContext.getContentResolver(), uri, height, height));
         }
 
-        return thumbnailMap.get(imageUri);
+        return thumbnailMap.get(group.getTitle());
     }
 }

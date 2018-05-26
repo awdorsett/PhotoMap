@@ -11,7 +11,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.metadata.Metadata;
@@ -41,8 +43,10 @@ public class MainActivity extends AppCompatActivity {
     private Geocoder geocoder;
     private MarkerSQLiteOpenHelper sqlHelper;
     private ArrayList<ImageMarker> incompleteMarkers = new ArrayList<>();
-    private FloatingActionButton incompleteImageButton;
+//    private FloatingActionButton incompleteImageButton;
     ListView groupList;
+    RelativeLayout notificationBarLayout;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,18 +56,19 @@ public class MainActivity extends AppCompatActivity {
 
         Button imageButton = findViewById(R.id.imageButton);
         Button mapButton = findViewById(R.id.mapButton);
-        incompleteImageButton = findViewById(R.id.incompleteImageButton);
-        incompleteImageButton.setVisibility(View.GONE);
+//        incompleteImageButton = findViewById(R.id.incompleteImageButton);
+//        incompleteImageButton.setVisibility(View.GONE);
         //sqlHelper.resetTables(); // FOR TESTING
 
         groupList = findViewById(R.id.group_list);
+        notificationBarLayout = findViewById(R.id.notification_bar);
         updateGroupList();
 
         imageButton.setOnClickListener(view -> launchGallery(view));
 
         mapButton.setOnClickListener(view -> launchMaps(view, null));
 
-        incompleteImageButton.setOnClickListener(view -> {
+        notificationBarLayout.setOnClickListener(view -> {
             launchSelectGeo();
         });
 
@@ -143,7 +148,8 @@ public class MainActivity extends AppCompatActivity {
 
             sqlHelper.saveGroupToDB(groups);
             updateGroupList();
-            incompleteImageButton.setVisibility(incompleteMarkers.isEmpty() ? View.GONE : View.VISIBLE);
+            notificationBarLayout.setVisibility(incompleteMarkers.isEmpty() ? View.GONE : View.VISIBLE);
+//            incompleteImageButton.setVisibility(incompleteMarkers.isEmpty() ? View.GONE : View.VISIBLE);
 
             // TODO is this needed?
         } else if (requestCode == OPEN_IMAGE_SELECT) {
@@ -157,7 +163,8 @@ public class MainActivity extends AppCompatActivity {
                 }
                 sqlHelper.saveGroupToDB(groups);
 
-                incompleteImageButton.setVisibility(incompleteMarkers.isEmpty() ? View.GONE : View.VISIBLE);
+                notificationBarLayout.setVisibility(incompleteMarkers.isEmpty() ? View.GONE : View.VISIBLE);
+//                incompleteImageButton.setVisibility(incompleteMarkers.isEmpty() ? View.GONE : View.VISIBLE);
 
                 updateGroupList();
             }
