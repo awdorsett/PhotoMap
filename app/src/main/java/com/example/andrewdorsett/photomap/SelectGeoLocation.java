@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 import static com.example.andrewdorsett.photomap.Constants.COMPLETE_IMAGE_KEY;
 import static com.example.andrewdorsett.photomap.Constants.INCOMPLETE_IMAGES_KEY;
 import static com.example.andrewdorsett.photomap.Constants.SELECT_GEO;
+import static com.example.andrewdorsett.photomap.Constants.UPDATED_GROUP_KEY;
 
 public class SelectGeoLocation extends AppCompatActivity {
     private List<ImageMarker> incompleteImages;
@@ -149,6 +150,7 @@ public class SelectGeoLocation extends AppCompatActivity {
             Intent data = new Intent();
             Bundle bundle = new Bundle();
             bundle.putParcelableArrayList(COMPLETE_IMAGE_KEY, completeImages);
+  //          bundle.putParcelableArrayList(UPDATED_GROUP_KEY, updatedGroup);
             data.putExtra("bundle", bundle);
             setResult(SELECT_GEO, data);
             finish();

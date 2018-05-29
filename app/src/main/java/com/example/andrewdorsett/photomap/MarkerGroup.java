@@ -63,7 +63,7 @@ public class MarkerGroup implements Parcelable, ClusterItem {
     }
 
     public void addMarkers(List<ImageMarker> markers) {
-        markers.addAll(markers);
+        this.markers.addAll(markers);
     }
 
 

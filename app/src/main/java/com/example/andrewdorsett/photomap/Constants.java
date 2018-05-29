@@ -14,6 +14,7 @@ public class Constants {
     public static final String URI_KEY = "uris";
     public static final String INCOMPLETE_IMAGES_KEY = "incompleteImages";
     public static final String COMPLETE_IMAGE_KEY = "completeImages";
+    public static final String UPDATED_GROUP_KEY = "updatedGroups";
 
     // Activity Codes
     // move to enum?

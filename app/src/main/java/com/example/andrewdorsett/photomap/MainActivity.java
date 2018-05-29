@@ -32,6 +32,7 @@ import static com.example.andrewdorsett.photomap.Constants.OPEN_IMAGE_SELECT;
 import static com.example.andrewdorsett.photomap.Constants.PICK_IMAGE;
 import static com.example.andrewdorsett.photomap.Constants.SELECT_GEO;
 import static com.example.andrewdorsett.photomap.Constants.SELECT_GROUP_KEY;
+import static com.example.andrewdorsett.photomap.Constants.UPDATED_GROUP_KEY;
 
 public class MainActivity extends AppCompatActivity {
     private static String TAG = "MainActivity";
@@ -159,6 +160,7 @@ public class MainActivity extends AppCompatActivity {
                     addImageMarkerToGroup(marker);
                     incompleteMarkers.remove(marker);
                 }
+
                 sqlHelper.saveGroupToDB(groups);
 
                 notificationBarLayout.setVisibility(incompleteMarkers.isEmpty() ? View.GONE : View.VISIBLE);
