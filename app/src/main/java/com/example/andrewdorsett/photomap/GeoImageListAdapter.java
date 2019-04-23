@@ -23,7 +23,6 @@ public class GeoImageListAdapter extends ImageListAdapter {
         this.context = context;
     }
 
-    // TODO DRY out code and make inheritance proper
     @Override
     public View getView(int pos, View view, ViewGroup parent) {
         GeoGroupViewHolder viewHolder;

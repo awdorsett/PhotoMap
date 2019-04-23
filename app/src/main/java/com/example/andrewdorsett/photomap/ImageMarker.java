@@ -42,10 +42,19 @@ public class ImageMarker implements Parcelable, ClusterItem {
         this.id = id;
         this.title = title;
         latLng = new LatLng(latitude, longitude);
-        this.originalDate = originalDate;
         this.addedDate = addedDate;
+        this.originalDate = originalDate;
         this.imageUri = imageUri;
         this.groupId = groupId;
+    }
+
+    @Override
+    public LatLng getPosition() {
+        return latLng;
+    }
+
+    public void setLatLng(double latitude, double longitude) {
+        this.latLng = new LatLng(latitude, longitude);
     }
 
     public long getId() {
@@ -70,14 +79,7 @@ public class ImageMarker implements Parcelable, ClusterItem {
         this.title = title;
     }
 
-    @Override
-    public LatLng getPosition() {
-        return latLng;
-    }
 
-    public void setLatLng(double latitude, double longitude) {
-        this.latLng = new LatLng(latitude, longitude);
-    }
 
     public void setLatLng(@NotNull LatLng newLatLong) {
         this.latLng = newLatLong;
@@ -124,6 +126,24 @@ public class ImageMarker implements Parcelable, ClusterItem {
         return 0;
     }
 
+
+    @Override
+    public int hashCode() {
+        int hash = 37;
+        hash += id;
+        hash += imageUri.hashCode();
+        hash += latLng.hashCode();
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object second) {
+        if (second instanceof ImageMarker) {
+            return this.imageUri.equals(((ImageMarker) second).getImageUri());
+        }
+        return false;
+    }
+
     @Override
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeLong(id);
@@ -146,20 +166,4 @@ public class ImageMarker implements Parcelable, ClusterItem {
         this.groupId = in.readLong();
     }
 
-    @Override
-    public int hashCode() {
-        int hash = 37;
-        hash += id;
-        hash += imageUri.hashCode();
-        hash += latLng.hashCode();
-        return hash;
-    }
-
-    @Override
-    public boolean equals(Object second) {
-        if (second instanceof ImageMarker) {
-            return this.imageUri.equals(((ImageMarker) second).getImageUri());
-        }
-        return false;
-    }
 }

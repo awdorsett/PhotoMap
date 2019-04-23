@@ -73,7 +73,7 @@ public class GroupListAdapter extends BaseAdapter {
 
         MarkerGroup group = groups.get(pos);
         viewHolder.groupTitle.setText(group.getTitle());
-        viewHolder.groupInfo.setText("Image Count: " + group.getMarkers().size());
+        viewHolder.groupInfo.setText(@strings.get('image_count') + group.getMarkers().size());
         if (!group.getMarkers().isEmpty()) {
             viewHolder.groupImage.setImageBitmap(getThumbnail(group));
         }

@@ -84,7 +84,12 @@ public class MapsActivity extends FragmentActivity implements
 
     //implement the onClusterItemClick interface
     @Override
-    public boolean onClusterItemClick(MarkerGroup clusterItem){
+    public boolean onClusterItemDoubleClick(MarkerGroup clusterItem){
+        if (clusterItem.option)
+    }
+
+    @Override
+    public boolean onClusterItemHold(MarkerGroup clusterItem){
         ArrayList<Uri> imageUris = new ArrayList<>();
 
         for (ImageMarker imageMarker : clusterItem.getMarkers()) {
@@ -99,6 +104,20 @@ public class MapsActivity extends FragmentActivity implements
         startActivity(intent);
 
         return false;
+    }
+
+    //implement the onClusterItemClick interface
+    @Override
+    public boolean onClusterItemClick(MarkerGroup clusterItem){
+        if (mMap.getCameraPosition().zoom < 200) {
+            return onClusterItemHold(clusterItem)
+        } else {
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
+                    cluster.getPosition(), (float) Math.floor(mMap
+                            .getCameraPosition().zoom + 1)), 300,
+                    null);
+            return false;
+        }
     }
 
     private void setUpClusterer() {
@@ -125,6 +144,24 @@ public class MapsActivity extends FragmentActivity implements
                             null);
                     return true;
                 });
+
+    }
+
+    private void showClusterOptions(MarkerGroup clusterItem) {
+        if !(mMap.contains(clusterItem.getOptions())) {
+            clusterManager = new ClusterManager<MarkerGroup>(this, mMap);
+
+            nMap.addItems(clusterItem.getOptions());
+            clusterManager.addItems(clusterItem.getOptions());
+            clusterManager.setRenderer(new MarkerClusterRenderer(this, mMap, clusterManager));
+
+            clusterManager.setOnClusterItemClickListener(this);
+        } else {
+            nMap.removeItems(clusterItem.getOptions());
+            clusterManager.removeItems(clusterItem.getOptions())
+            return null;
+        }
+
 
     }
 }

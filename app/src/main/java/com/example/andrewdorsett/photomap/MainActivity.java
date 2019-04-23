@@ -55,9 +55,6 @@ public class MainActivity extends AppCompatActivity {
 
         Button imageButton = findViewById(R.id.imageButton);
         Button mapButton = findViewById(R.id.mapButton);
-//        incompleteImageButton = findViewById(R.id.incompleteImageButton);
-//        incompleteImageButton.setVisibility(View.GONE);
-        //sqlHelper.resetTables(); // FOR TESTING
 
         groupList = findViewById(R.id.group_list);
         notificationBarLayout = findViewById(R.id.notification_bar);
@@ -71,7 +68,6 @@ public class MainActivity extends AppCompatActivity {
             launchSelectGeo();
         });
 
-        // TODO Remove after testing is done
         Button resetButton = findViewById(R.id.resetButton);
         resetButton.setOnClickListener(view -> {
             groups = new ArrayList<>();
@@ -117,16 +113,6 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-
-        // TODO clean up this code, use switch statement?
-//        switch(resultCode){
-//            case OPEN_IMAGE_SELECT:
-//                break;
-//            case SELECT_GEO:
-//                break;
-//            case PICK_IMAGE:
-//                break;
-//        }
         if (requestCode == PICK_IMAGE && data != null) {
             if (data.getData() != null) {
                 ImageMarker marker = constructImageMarker(data.getData(), data);
@@ -148,7 +134,6 @@ public class MainActivity extends AppCompatActivity {
             sqlHelper.saveGroupToDB(groups);
             updateGroupList();
             notificationBarLayout.setVisibility(incompleteMarkers.isEmpty() ? View.GONE : View.VISIBLE);
-//            incompleteImageButton.setVisibility(incompleteMarkers.isEmpty() ? View.GONE : View.VISIBLE);
 
             // TODO is this needed?
         } else if (requestCode == OPEN_IMAGE_SELECT) {
@@ -164,7 +149,6 @@ public class MainActivity extends AppCompatActivity {
                 sqlHelper.saveGroupToDB(groups);
 
                 notificationBarLayout.setVisibility(incompleteMarkers.isEmpty() ? View.GONE : View.VISIBLE);
-//                incompleteImageButton.setVisibility(incompleteMarkers.isEmpty() ? View.GONE : View.VISIBLE);
 
                 updateGroupList();
             }

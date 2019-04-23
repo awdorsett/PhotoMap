@@ -61,15 +61,12 @@ public class ImageGalleryDisplayActivity extends AppCompatActivity {
                 iv.setPadding(0,5,0,0);
                 iv.setScaleType(ImageView.ScaleType.FIT_XY);
                 iv.setAdjustViewBounds(true);
-                // Create layout parameters for ImageView
                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
                        LinearLayout.LayoutParams.MATCH_PARENT,
                        LinearLayout.LayoutParams.WRAP_CONTENT);
 
-                // Add layout parameters to ImageView
                 iv.setLayoutParams(lp);
 
-                // Finally, add the ImageView to layout
                 container.addView(iv);
             }
 
